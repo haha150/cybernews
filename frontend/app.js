@@ -12,6 +12,12 @@ let searchDebounceTimer = null;
 
 function relativeTime(dateStr) {
     if (!dateStr) return '';
+    // DB stores UTC — append Z if no timezone indicator present
+    if (!dateStr.endsWith('Z') && !dateStr.includes('+') && !dateStr.includes('T')) {
+        dateStr = dateStr.replace(' ', 'T') + 'Z';
+    } else if (!dateStr.endsWith('Z') && !dateStr.includes('+')) {
+        dateStr = dateStr + 'Z';
+    }
     const date = new Date(dateStr);
     const now = new Date();
     const diff = Math.floor((now - date) / 1000);

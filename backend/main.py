@@ -2,21 +2,22 @@
 CyberNews Aggregator — Backend Entry Point
 
 Language: Python 3.12 + FastAPI
-Why: FastAPI provides async-first HTTP handling ideal for concurrent RSS fetching
-across 80+ feeds. feedparser is the gold standard for RSS/Atom parsing. Python's
-asyncio + httpx give excellent concurrency for I/O-bound enrichment queries.
-SQLite via aiosqlite keeps deployment simple (single file, no extra service).
-APScheduler handles periodic refresh without external cron or celery.
 """
 
 import asyncio
 import json
 import os
+import secrets
+import time
+from collections import defaultdict
 
 import structlog
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from backend import db
 from backend.fetcher import fetch_all_sources
@@ -40,15 +41,82 @@ logger = structlog.get_logger()
 
 app = FastAPI(title="CyberNews Aggregator", version="1.0.0")
 
+# --- GZip ---
+app.add_middleware(GZipMiddleware, minimum_size=500)
+
+# --- CORS ---
+cors_origins = os.getenv("CORS_ORIGINS", "").strip()
+if cors_origins:
+    origins = [o.strip() for o in cors_origins.split(",") if o.strip()]
+else:
+    origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(router)
+# --- Optional Basic Auth ---
+AUTH_USERNAME = os.getenv("AUTH_USERNAME", "").strip()
+AUTH_PASSWORD = os.getenv("AUTH_PASSWORD", "").strip()
+security = HTTPBasic(auto_error=False)
+
+
+async def check_auth(request: Request):
+    """If AUTH_USERNAME/AUTH_PASSWORD are set, enforce HTTP Basic Auth."""
+    if not AUTH_USERNAME or not AUTH_PASSWORD:
+        return  # Auth not configured — allow all
+
+    # Allow healthcheck endpoint without auth
+    if request.url.path == "/api/stats":
+        return
+
+    credentials: HTTPBasicCredentials | None = await security(request)
+    if credentials is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Authentication required",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    correct_user = secrets.compare_digest(credentials.username.encode(), AUTH_USERNAME.encode())
+    correct_pass = secrets.compare_digest(credentials.password.encode(), AUTH_PASSWORD.encode())
+    if not (correct_user and correct_pass):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
+# --- Simple in-memory rate limiter ---
+_rate_store: dict[str, list[float]] = defaultdict(list)
+RATE_LIMIT_RPM = int(os.getenv("RATE_LIMIT_RPM", "30"))  # requests per minute
+
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    # Only rate limit mutating endpoints
+    if request.url.path in ("/api/refresh",) and request.method == "POST":
+        client_ip = request.client.host if request.client else "unknown"
+        now = time.time()
+        window = 60.0
+
+        # Clean old entries
+        _rate_store[client_ip] = [t for t in _rate_store[client_ip] if now - t < window]
+
+        if len(_rate_store[client_ip]) >= RATE_LIMIT_RPM:
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Too many requests. Try again later."},
+            )
+        _rate_store[client_ip].append(now)
+
+    return await call_next(request)
+
+
+app.include_router(router, dependencies=[Depends(check_auth)])
 
 
 @app.on_event("startup")
@@ -78,7 +146,7 @@ async def startup():
 async def _startup_seed():
     """Run initial fetch in background so the server starts responding immediately."""
     try:
-        await asyncio.sleep(2)  # Brief delay to let server finish startup
+        await asyncio.sleep(2)
         results = await fetch_all_sources()
         logger.info("startup_seed_complete", **results)
     except Exception as e:
@@ -88,4 +156,5 @@ async def _startup_seed():
 @app.on_event("shutdown")
 async def shutdown():
     stop_scheduler()
+    await db.close_pool()
     logger.info("app_stopped")

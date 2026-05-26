@@ -1,5 +1,6 @@
-"""Database layer — async SQLite via aiosqlite."""
+"""Database layer — async SQLite via aiosqlite with connection pooling."""
 
+import asyncio
 import json
 import os
 import aiosqlite
@@ -8,6 +9,7 @@ import structlog
 logger = structlog.get_logger()
 
 DB_PATH = os.getenv("DB_PATH", "/app/data/cybernews.db")
+RETENTION_DAYS = int(os.getenv("RETENTION_DAYS", "30"))
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS sources (
@@ -57,294 +59,267 @@ CREATE INDEX IF NOT EXISTS idx_articles_source ON articles(source_id);
 CREATE INDEX IF NOT EXISTS idx_articles_category ON articles(category);
 CREATE INDEX IF NOT EXISTS idx_articles_published ON articles(published_at DESC);
 CREATE INDEX IF NOT EXISTS idx_articles_url ON articles(url);
+CREATE INDEX IF NOT EXISTS idx_articles_title_source ON articles(title, source_id);
+CREATE INDEX IF NOT EXISTS idx_articles_fetched ON articles(fetched_at);
 """
+
+# --- Connection pool ---
+_pool: list[aiosqlite.Connection] = []
+_pool_lock = asyncio.Lock()
+_pool_size = int(os.getenv("DB_POOL_SIZE", "5"))
+
+
+async def _create_conn() -> aiosqlite.Connection:
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    conn = await aiosqlite.connect(DB_PATH)
+    conn.row_factory = aiosqlite.Row
+    await conn.execute("PRAGMA journal_mode=WAL")
+    await conn.execute("PRAGMA foreign_keys=ON")
+    await conn.execute("PRAGMA busy_timeout=5000")
+    return conn
 
 
 async def get_db() -> aiosqlite.Connection:
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    db = await aiosqlite.connect(DB_PATH)
-    db.row_factory = aiosqlite.Row
-    await db.execute("PRAGMA journal_mode=WAL")
-    await db.execute("PRAGMA foreign_keys=ON")
-    return db
+    async with _pool_lock:
+        if _pool:
+            return _pool.pop()
+    return await _create_conn()
+
+
+async def release_db(conn: aiosqlite.Connection):
+    async with _pool_lock:
+        if len(_pool) < _pool_size:
+            _pool.append(conn)
+            return
+    await conn.close()
+
+
+async def close_pool():
+    async with _pool_lock:
+        for conn in _pool:
+            await conn.close()
+        _pool.clear()
 
 
 async def init_db():
-    db = await get_db()
+    conn = await get_db()
     try:
-        await db.executescript(SCHEMA)
-        await db.commit()
+        await conn.executescript(SCHEMA)
+        await conn.commit()
         logger.info("database_initialized", path=DB_PATH)
     finally:
-        await db.close()
+        await release_db(conn)
 
 
 async def seed_sources(sources: list[dict]):
-    db = await get_db()
+    conn = await get_db()
     try:
         for src in sources:
-            await db.execute(
+            await conn.execute(
                 """INSERT OR IGNORE INTO sources (id, name, url, category, enabled, tags, is_custom)
                    VALUES (?, ?, ?, ?, ?, ?, 0)""",
-                (
-                    src["id"],
-                    src["name"],
-                    src["url"],
-                    src["category"],
-                    1 if src.get("enabled", True) else 0,
-                    json.dumps(src.get("tags", [])),
-                ),
+                (src["id"], src["name"], src["url"], src["category"],
+                 1 if src.get("enabled", True) else 0, json.dumps(src.get("tags", []))),
             )
-        await db.commit()
+        await conn.commit()
         logger.info("sources_seeded", count=len(sources))
     finally:
-        await db.close()
+        await release_db(conn)
 
 
 async def get_enabled_sources() -> list[dict]:
-    db = await get_db()
+    conn = await get_db()
     try:
-        cursor = await db.execute("SELECT * FROM sources WHERE enabled = 1")
-        rows = await cursor.fetchall()
-        return [dict(r) for r in rows]
+        cursor = await conn.execute("SELECT * FROM sources WHERE enabled = 1")
+        return [dict(r) for r in await cursor.fetchall()]
     finally:
-        await db.close()
+        await release_db(conn)
 
 
 async def get_all_sources() -> list[dict]:
-    db = await get_db()
+    conn = await get_db()
     try:
-        cursor = await db.execute("SELECT * FROM sources ORDER BY category, name")
-        rows = await cursor.fetchall()
-        return [dict(r) for r in rows]
+        cursor = await conn.execute("SELECT * FROM sources ORDER BY category, name")
+        return [dict(r) for r in await cursor.fetchall()]
     finally:
-        await db.close()
+        await release_db(conn)
 
 
 async def update_source_health(source_id: str, status_code: int | None, error: str | None):
-    db = await get_db()
+    conn = await get_db()
     try:
-        await db.execute(
-            """UPDATE sources
-               SET last_fetched_at = datetime('now'),
-                   last_status_code = ?,
-                   last_error = ?
-               WHERE id = ?""",
+        await conn.execute(
+            """UPDATE sources SET last_fetched_at = datetime('now'),
+               last_status_code = ?, last_error = ? WHERE id = ?""",
             (status_code, error, source_id),
         )
-        await db.commit()
+        await conn.commit()
     finally:
-        await db.close()
+        await release_db(conn)
 
 
 async def update_source_article_count(source_id: str):
-    db = await get_db()
+    conn = await get_db()
     try:
-        await db.execute(
+        await conn.execute(
             """UPDATE sources SET article_count = (
                  SELECT COUNT(*) FROM articles WHERE source_id = ?
-               ) WHERE id = ?""",
-            (source_id, source_id),
-        )
-        await db.commit()
+               ) WHERE id = ?""", (source_id, source_id))
+        await conn.commit()
     finally:
-        await db.close()
+        await release_db(conn)
 
 
 async def insert_article(article: dict) -> bool:
-    db = await get_db()
+    conn = await get_db()
     try:
+        # Title+source dedup
+        cursor = await conn.execute(
+            "SELECT 1 FROM articles WHERE title = ? AND source_id = ? LIMIT 1",
+            (article["title"], article["source_id"]),
+        )
+        if await cursor.fetchone():
+            return False
         try:
-            await db.execute(
+            await conn.execute(
                 """INSERT INTO articles (title, url, description, published_at, source_id, category, cve_ids, severity)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                (
-                    article["title"],
-                    article["url"],
-                    article.get("description"),
-                    article.get("published_at"),
-                    article["source_id"],
-                    article.get("category", "news"),
-                    json.dumps(article.get("cve_ids", [])),
-                    article.get("severity"),
-                ),
+                (article["title"], article["url"], article.get("description"),
+                 article.get("published_at"), article["source_id"],
+                 article.get("category", "news"), json.dumps(article.get("cve_ids", [])),
+                 article.get("severity")),
             )
-            await db.commit()
+            await conn.commit()
             return True
         except aiosqlite.IntegrityError:
             return False
     finally:
-        await db.close()
+        await release_db(conn)
 
 
-async def get_articles(
-    category: str | None = None,
-    search: str | None = None,
-    poc_only: bool = False,
-    page: int = 1,
-    limit: int = 50,
-) -> tuple[list[dict], int]:
-    db = await get_db()
+async def get_articles(category=None, search=None, poc_only=False, page=1, limit=50):
+    conn = await get_db()
     try:
-        conditions = []
-        params: list = []
-
+        conditions, params = [], []
         if category and category != "all":
-            cat_map = {
-                "cve": "cve",
-                "redteam": "redteam",
-                "threat-intel": "threat-intel",
-                "news": "news",
-                "government": "government",
-                "research": "research",
-                "zero-day": "cve",
-            }
-            mapped = cat_map.get(category, category)
+            cat_map = {"cve":"cve","redteam":"redteam","threat-intel":"threat-intel",
+                       "news":"news","government":"government","research":"research","zero-day":"cve"}
             conditions.append("a.category = ?")
-            params.append(mapped)
-
+            params.append(cat_map.get(category, category))
         if search:
             conditions.append("(a.title LIKE ? OR a.description LIKE ?)")
             term = f"%{search}%"
             params.extend([term, term])
-
         if poc_only:
             conditions.append("a.is_poc_enriched = 1")
 
         where = " AND ".join(conditions) if conditions else "1=1"
-
-        count_sql = f"SELECT COUNT(*) FROM articles a WHERE {where}"
-        cursor = await db.execute(count_sql, params)
-        row = await cursor.fetchone()
-        total = row[0]
+        cursor = await conn.execute(f"SELECT COUNT(*) FROM articles a WHERE {where}", params)
+        total = (await cursor.fetchone())[0]
 
         offset = (page - 1) * limit
-        query = f"""
-            SELECT a.*, s.name as source_name
-            FROM articles a
+        cursor = await conn.execute(f"""
+            SELECT a.*, s.name as source_name FROM articles a
             LEFT JOIN sources s ON a.source_id = s.id
             WHERE {where}
             ORDER BY a.published_at DESC NULLS LAST, a.fetched_at DESC
-            LIMIT ? OFFSET ?
-        """
-        params.extend([limit, offset])
-        cursor = await db.execute(query, params)
-        rows = await cursor.fetchall()
+            LIMIT ? OFFSET ?""", params + [limit, offset])
         articles = []
-        for r in rows:
+        for r in await cursor.fetchall():
             art = dict(r)
             art["cve_ids"] = json.loads(art.get("cve_ids") or "[]")
             articles.append(art)
-
         return articles, total
     finally:
-        await db.close()
+        await release_db(conn)
 
 
-async def get_cve_enrichment(cve_id: str) -> dict | None:
-    db = await get_db()
+async def get_cve_enrichment(cve_id: str):
+    conn = await get_db()
     try:
-        cursor = await db.execute("SELECT * FROM cve_enrichments WHERE cve_id = ?", (cve_id,))
+        cursor = await conn.execute("SELECT * FROM cve_enrichments WHERE cve_id = ?", (cve_id,))
         row = await cursor.fetchone()
         if row:
             d = dict(row)
-            d["github_pocs"] = json.loads(d.get("github_pocs") or "[]")
-            d["exploit_db_ids"] = json.loads(d.get("exploit_db_ids") or "[]")
-            d["sploitus_urls"] = json.loads(d.get("sploitus_urls") or "[]")
+            for k in ("github_pocs", "exploit_db_ids", "sploitus_urls"):
+                d[k] = json.loads(d.get(k) or "[]")
             return d
         return None
     finally:
-        await db.close()
+        await release_db(conn)
 
 
 async def upsert_cve_enrichment(data: dict):
-    db = await get_db()
+    conn = await get_db()
     try:
-        await db.execute(
+        await conn.execute(
             """INSERT INTO cve_enrichments (cve_id, github_pocs, is_kev, kev_date_added,
                    kev_ransomware, cvss_score, cvss_vector, exploit_db_ids, sploitus_urls, enriched_at)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
                ON CONFLICT(cve_id) DO UPDATE SET
-                   github_pocs = excluded.github_pocs,
-                   is_kev = excluded.is_kev,
-                   kev_date_added = excluded.kev_date_added,
-                   kev_ransomware = excluded.kev_ransomware,
-                   cvss_score = excluded.cvss_score,
-                   cvss_vector = excluded.cvss_vector,
-                   exploit_db_ids = excluded.exploit_db_ids,
-                   sploitus_urls = excluded.sploitus_urls,
-                   enriched_at = datetime('now')""",
-            (
-                data["cve_id"],
-                json.dumps(data.get("github_pocs", [])),
-                1 if data.get("is_kev") else 0,
-                data.get("kev_date_added"),
-                1 if data.get("kev_ransomware") else 0,
-                data.get("cvss_score"),
-                data.get("cvss_vector"),
-                json.dumps(data.get("exploit_db_ids", [])),
-                json.dumps(data.get("sploitus_urls", [])),
-            ),
+                   github_pocs=excluded.github_pocs, is_kev=excluded.is_kev,
+                   kev_date_added=excluded.kev_date_added, kev_ransomware=excluded.kev_ransomware,
+                   cvss_score=excluded.cvss_score, cvss_vector=excluded.cvss_vector,
+                   exploit_db_ids=excluded.exploit_db_ids, sploitus_urls=excluded.sploitus_urls,
+                   enriched_at=datetime('now')""",
+            (data["cve_id"], json.dumps(data.get("github_pocs", [])),
+             1 if data.get("is_kev") else 0, data.get("kev_date_added"),
+             1 if data.get("kev_ransomware") else 0, data.get("cvss_score"),
+             data.get("cvss_vector"), json.dumps(data.get("exploit_db_ids", [])),
+             json.dumps(data.get("sploitus_urls", []))),
         )
-        await db.commit()
+        await conn.commit()
     finally:
-        await db.close()
+        await release_db(conn)
 
 
 async def mark_article_enriched(article_id: int):
-    db = await get_db()
+    conn = await get_db()
     try:
-        await db.execute("UPDATE articles SET is_poc_enriched = 1 WHERE id = ?", (article_id,))
-        await db.commit()
+        await conn.execute("UPDATE articles SET is_poc_enriched = 1 WHERE id = ?", (article_id,))
+        await conn.commit()
     finally:
-        await db.close()
+        await release_db(conn)
 
 
-async def get_stats() -> dict:
-    db = await get_db()
+async def get_stats():
+    conn = await get_db()
     try:
-        c = await db.execute("SELECT COUNT(*) FROM articles")
+        c = await conn.execute("SELECT COUNT(*) FROM articles")
         total_articles = (await c.fetchone())[0]
-        c = await db.execute("SELECT COUNT(*) FROM sources")
+        c = await conn.execute("SELECT COUNT(*) FROM sources")
         total_sources = (await c.fetchone())[0]
-        c = await db.execute("SELECT COUNT(DISTINCT cve_id) FROM cve_enrichments")
+        c = await conn.execute("SELECT COUNT(DISTINCT cve_id) FROM cve_enrichments")
         total_cves = (await c.fetchone())[0]
-        c = await db.execute("SELECT COUNT(*) FROM cve_enrichments WHERE github_pocs != '[]'")
+        c = await conn.execute("SELECT COUNT(*) FROM cve_enrichments WHERE github_pocs != '[]'")
         total_pocs = (await c.fetchone())[0]
-        return {
-            "total_articles": total_articles,
-            "total_sources": total_sources,
-            "cves_tracked": total_cves,
-            "pocs_found": total_pocs,
-        }
+        return {"total_articles": total_articles, "total_sources": total_sources,
+                "cves_tracked": total_cves, "pocs_found": total_pocs}
     finally:
-        await db.close()
+        await release_db(conn)
 
 
-async def add_custom_source(name: str, url: str, category: str) -> dict:
+async def add_custom_source(name: str, url: str, category: str):
     import hashlib
     source_id = "custom_" + hashlib.sha256(url.encode()).hexdigest()[:12]
-    db = await get_db()
+    conn = await get_db()
     try:
-        await db.execute(
+        await conn.execute(
             """INSERT INTO sources (id, name, url, category, enabled, tags, is_custom)
                VALUES (?, ?, ?, ?, 1, '[]', 1)""",
-            (source_id, name, url, category),
-        )
-        await db.commit()
-        cursor = await db.execute("SELECT * FROM sources WHERE id = ?", (source_id,))
-        row = await cursor.fetchone()
-        return dict(row)
+            (source_id, name, url, category))
+        await conn.commit()
+        cursor = await conn.execute("SELECT * FROM sources WHERE id = ?", (source_id,))
+        return dict(await cursor.fetchone())
     finally:
-        await db.close()
+        await release_db(conn)
 
 
 async def update_source(source_id: str, updates: dict):
-    db = await get_db()
+    conn = await get_db()
     try:
         allowed = {"name", "enabled", "category"}
-        sets = []
-        params = []
+        sets, params = [], []
         for k, v in updates.items():
             if k in allowed:
                 sets.append(f"{k} = ?")
@@ -352,39 +327,56 @@ async def update_source(source_id: str, updates: dict):
         if not sets:
             return
         params.append(source_id)
-        await db.execute(f"UPDATE sources SET {', '.join(sets)} WHERE id = ?", params)
-        await db.commit()
+        await conn.execute(f"UPDATE sources SET {', '.join(sets)} WHERE id = ?", params)
+        await conn.commit()
     finally:
-        await db.close()
+        await release_db(conn)
 
 
 async def delete_source(source_id: str) -> bool:
-    db = await get_db()
+    conn = await get_db()
     try:
-        cursor = await db.execute("DELETE FROM sources WHERE id = ? AND is_custom = 1", (source_id,))
-        await db.commit()
+        cursor = await conn.execute("DELETE FROM sources WHERE id = ? AND is_custom = 1", (source_id,))
+        await conn.commit()
         return cursor.rowcount > 0
     finally:
-        await db.close()
+        await release_db(conn)
 
 
 async def get_enrichments_for_cves(cve_ids: list[str]) -> dict:
     if not cve_ids:
         return {}
-    db = await get_db()
+    conn = await get_db()
     try:
         placeholders = ",".join("?" for _ in cve_ids)
-        cursor = await db.execute(
-            f"SELECT * FROM cve_enrichments WHERE cve_id IN ({placeholders})", cve_ids
-        )
-        rows = await cursor.fetchall()
+        cursor = await conn.execute(
+            f"SELECT * FROM cve_enrichments WHERE cve_id IN ({placeholders})", cve_ids)
         result = {}
-        for r in rows:
+        for r in await cursor.fetchall():
             d = dict(r)
-            d["github_pocs"] = json.loads(d.get("github_pocs") or "[]")
-            d["exploit_db_ids"] = json.loads(d.get("exploit_db_ids") or "[]")
-            d["sploitus_urls"] = json.loads(d.get("sploitus_urls") or "[]")
+            for k in ("github_pocs", "exploit_db_ids", "sploitus_urls"):
+                d[k] = json.loads(d.get(k) or "[]")
             result[d["cve_id"]] = d
         return result
     finally:
-        await db.close()
+        await release_db(conn)
+
+
+async def cleanup_old_articles():
+    """Delete articles older than RETENTION_DAYS and vacuum."""
+    conn = await get_db()
+    try:
+        cursor = await conn.execute(
+            "DELETE FROM articles WHERE fetched_at < datetime('now', ?)",
+            (f"-{RETENTION_DAYS} days",))
+        deleted = cursor.rowcount
+        if deleted > 0:
+            await conn.commit()
+            await conn.execute(
+                """UPDATE sources SET article_count = (
+                     SELECT COUNT(*) FROM articles WHERE articles.source_id = sources.id)""")
+            await conn.commit()
+            logger.info("cleanup_old_articles", deleted=deleted, retention_days=RETENTION_DAYS)
+        await conn.execute("PRAGMA incremental_vacuum")
+    finally:
+        await release_db(conn)

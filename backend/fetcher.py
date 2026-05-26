@@ -1,5 +1,6 @@
 """RSS/Atom feed fetcher and parser."""
 
+import asyncio
 import re
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
@@ -144,19 +145,21 @@ async def fetch_source(source: dict) -> int:
 
 async def fetch_all_sources() -> dict:
     sources = await db.get_enabled_sources()
-    total_new = 0
     results = {"sources_fetched": 0, "new_articles": 0, "errors": 0}
 
-    for source in sources:
-        try:
-            new = await fetch_source(source)
-            total_new += new
-            results["sources_fetched"] += 1
-        except Exception as e:
-            results["errors"] += 1
-            logger.error("source_fetch_failed", source=source["id"], error=str(e))
+    sem = asyncio.Semaphore(10)
 
-    results["new_articles"] = total_new
+    async def _fetch_one(source):
+        async with sem:
+            try:
+                new = await fetch_source(source)
+                results["sources_fetched"] += 1
+                results["new_articles"] += new
+            except Exception as e:
+                results["errors"] += 1
+                logger.error("source_fetch_failed", source=source["id"], error=str(e))
+
+    await asyncio.gather(*[_fetch_one(s) for s in sources])
     logger.info("fetch_all_complete", **results)
     return results
 

@@ -204,13 +204,19 @@ async def enrich_pending_articles():
         )
         rows = await cursor.fetchall()
     finally:
-        await conn.close()
+        await db.release_db(conn)
 
-    for row in rows:
-        article = dict(row)
-        await enrich_article(article)
-        # Rate limit: small delay between enrichments
-        await asyncio.sleep(0.5)
+    # Rate-limit NVD queries: 5 req/30s without key, 50 with key
+    max_concurrent = 10 if NVD_API_KEY else 2
+    sem = asyncio.Semaphore(max_concurrent)
+
+    async def _enrich_one(row):
+        async with sem:
+            article = dict(row)
+            await enrich_article(article)
+            await asyncio.sleep(0.5)
+
+    await asyncio.gather(*[_enrich_one(r) for r in rows])
 
     if rows:
         logger.info("enrichment_batch_complete", count=len(rows))

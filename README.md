@@ -25,9 +25,13 @@ Open **http://localhost:8080** in your browser.
 - **OPML export** — import your feed list into any RSS reader
 - **Dark mode UI** — terminal/hacker aesthetic with monospace accents
 - **Responsive** — 3-column grid → tablet → mobile
-- **Deduplication** — skips articles with duplicate URLs
+- **Deduplication** — skips articles with duplicate URLs or title+source
 - **Toast notifications** when new articles arrive
 - **Fully containerized** — single `docker compose up` command
+- **TLS ready** — drop your cert/key into `certs/` for automatic HTTPS
+- **Optional auth** — HTTP Basic Auth via env vars
+- **Rate limiting** on mutating API endpoints
+- **GZip compression** for API responses
 
 ## Architecture
 
@@ -56,13 +60,37 @@ Open **http://localhost:8080** in your browser.
 | Variable | Default | Description |
 |---|---|---|
 | `BACKEND_PORT` | `8000` | Backend API port |
-| `FRONTEND_PORT` | `8080` | Frontend web UI port |
+| `FRONTEND_PORT` | `8080` | Frontend web UI port (HTTP) |
+| `HTTPS_PORT` | `8443` | Frontend web UI port (HTTPS) |
+| `SSL_CERT_DIR` | `./certs` | Directory containing `cert.pem` and `key.pem` |
 | `DB_PATH` | `/app/data/cybernews.db` | SQLite database path |
+| `DB_POOL_SIZE` | `5` | Connection pool size |
+| `RETENTION_DAYS` | `30` | Auto-delete articles older than this |
 | `REFRESH_INTERVAL_MINUTES` | `15` | Feed refresh interval |
 | `ENRICHMENT_INTERVAL_MINUTES` | `5` | CVE enrichment check interval |
 | `ENRICHMENT_TTL_HOURS` | `6` | Cache TTL for enrichment data |
 | `NVD_API_KEY` | *(empty)* | NVD API key for higher rate limits |
 | `FEEDS_PATH` | `feeds.json` | Path to feed sources config |
+| `CORS_ORIGINS` | `*` | Comma-separated allowed origins |
+| `AUTH_USERNAME` | *(empty)* | HTTP Basic Auth username (leave empty to disable) |
+| `AUTH_PASSWORD` | *(empty)* | HTTP Basic Auth password |
+| `RATE_LIMIT_RPM` | `30` | Max requests/min on mutating endpoints |
+
+## TLS / HTTPS
+
+To enable HTTPS, place your certificate and key in the `certs/` directory:
+
+```bash
+# Self-signed (testing)
+openssl req -x509 -newkey rsa:4096 -keyout certs/key.pem -out certs/cert.pem \
+  -days 365 -nodes -subj "/CN=cybernews.local"
+
+# Let's Encrypt
+cp /etc/letsencrypt/live/yourdomain/fullchain.pem certs/cert.pem
+cp /etc/letsencrypt/live/yourdomain/privkey.pem certs/key.pem
+```
+
+When certs are present, nginx automatically enables HTTPS on port 8443 (configurable via `HTTPS_PORT`) and redirects HTTP → HTTPS. Without certs, it serves HTTP only.
 
 ## Getting an NVD API Key
 

@@ -39,3 +39,8 @@ node_modules/
 # Logs
 *.log
 logs/
+
+# SSL certificates (keep README only)
+certs/*.pem
+certs/*.key
+certs/*.crt

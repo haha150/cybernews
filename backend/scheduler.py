@@ -6,6 +6,7 @@ import structlog
 
 from backend.fetcher import fetch_all_sources
 from backend.enricher import enrich_pending_articles, refresh_kev_catalog
+from backend.db import cleanup_old_articles
 
 logger = structlog.get_logger()
 
@@ -31,6 +32,13 @@ async def scheduled_enrich():
         logger.error("scheduled_enrich_error", error=str(e))
 
 
+async def scheduled_cleanup():
+    try:
+        await cleanup_old_articles()
+    except Exception as e:
+        logger.error("scheduled_cleanup_error", error=str(e))
+
+
 def start_scheduler():
     scheduler.add_job(
         scheduled_fetch,
@@ -51,6 +59,13 @@ def start_scheduler():
         "interval",
         hours=1,
         id="kev_refresh",
+        replace_existing=True,
+    )
+    scheduler.add_job(
+        scheduled_cleanup,
+        "interval",
+        hours=24,
+        id="article_cleanup",
         replace_existing=True,
     )
     scheduler.start()

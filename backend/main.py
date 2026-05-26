@@ -74,6 +74,17 @@ async def check_auth(request: Request):
     if request.url.path == "/api/stats":
         return
 
+    # Check fail2ban before processing credentials
+    client_ip = request.client.host if request.client else "unknown"
+    if client_ip in _banned_ips:
+        if time.time() - _banned_ips[client_ip] < FAIL2BAN_BAN_TIME:
+            raise HTTPException(
+                status_code=403,
+                detail="IP temporarily banned due to repeated failed login attempts.",
+            )
+        else:
+            del _banned_ips[client_ip]
+
     credentials: HTTPBasicCredentials | None = await security(request)
     if credentials is None:
         raise HTTPException(
@@ -120,8 +131,8 @@ RATE_LIMIT_RPM = int(os.getenv("RATE_LIMIT_RPM", "30"))  # requests per minute
 async def rate_limit_middleware(request: Request, call_next):
     client_ip = request.client.host if request.client else "unknown"
 
-    # Fail2ban check — block banned IPs
-    if client_ip in _banned_ips:
+    # Fail2ban check — block banned IPs (exempt healthcheck)
+    if client_ip in _banned_ips and request.url.path != "/api/stats":
         banned_at = _banned_ips[client_ip]
         if time.time() - banned_at < FAIL2BAN_BAN_TIME:
             return JSONResponse(

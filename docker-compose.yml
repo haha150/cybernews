@@ -8,8 +8,8 @@ services:
     env_file: .env
     volumes:
       - db-data:/app/data
-    ports:
-      - "${BACKEND_PORT:-8000}:8000"
+    expose:
+      - "8000"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/stats')"]
       interval: 30s

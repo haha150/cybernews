@@ -719,6 +719,46 @@
       "category": "redteam",
       "enabled": true,
       "tags": ["tools", "nuclei"]
+    },
+    {
+      "id": "elastic_security_labs",
+      "name": "Elastic Security Labs",
+      "url": "https://www.elastic.co/security-labs/rss/feed.xml",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": ["detection", "malware", "research"]
+    },
+    {
+      "id": "huntress",
+      "name": "Huntress Blog",
+      "url": "https://www.huntress.com/blog/rss.xml",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": ["msp", "incident-response", "malware"]
+    },
+    {
+      "id": "jpcert",
+      "name": "JPCERT/CC Blog",
+      "url": "https://blogs.jpcert.or.jp/en/atom.xml",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": ["apt", "japan", "incident-response"]
+    },
+    {
+      "id": "google_threat_intel",
+      "name": "Google Threat Intelligence (Mandiant)",
+      "url": "https://cloudblog.withgoogle.com/topics/threat-intelligence/rss/",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": ["apt", "mandiant", "research"]
+    },
+    {
+      "id": "unit42",
+      "name": "Unit 42 (Palo Alto Networks)",
+      "url": "https://unit42.paloaltonetworks.com/feed/",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": ["apt", "malware", "research"]
     }
   ],
   "discovery_sources": [

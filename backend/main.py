@@ -84,11 +84,32 @@ async def check_auth(request: Request):
     correct_user = secrets.compare_digest(credentials.username.encode(), AUTH_USERNAME.encode())
     correct_pass = secrets.compare_digest(credentials.password.encode(), AUTH_PASSWORD.encode())
     if not (correct_user and correct_pass):
+        _record_failed_login(request)
         raise HTTPException(
             status_code=401,
             detail="Invalid credentials",
             headers={"WWW-Authenticate": "Basic"},
         )
+
+# --- Fail2ban: block IPs after repeated failed logins ---
+_fail_store: dict[str, list[float]] = defaultdict(list)
+_banned_ips: dict[str, float] = {}
+FAIL2BAN_MAX_ATTEMPTS = int(os.getenv("FAIL2BAN_MAX_ATTEMPTS", "5"))
+FAIL2BAN_WINDOW = int(os.getenv("FAIL2BAN_WINDOW", "300"))      # 5 min window
+FAIL2BAN_BAN_TIME = int(os.getenv("FAIL2BAN_BAN_TIME", "900"))  # 15 min ban
+
+
+def _record_failed_login(request: Request):
+    client_ip = request.client.host if request.client else "unknown"
+    now = time.time()
+    _fail_store[client_ip].append(now)
+    # Clean old attempts outside window
+    _fail_store[client_ip] = [t for t in _fail_store[client_ip] if now - t < FAIL2BAN_WINDOW]
+    if len(_fail_store[client_ip]) >= FAIL2BAN_MAX_ATTEMPTS:
+        _banned_ips[client_ip] = now
+        _fail_store[client_ip].clear()
+        logger.warning("fail2ban_ip_banned", ip=client_ip, ban_seconds=FAIL2BAN_BAN_TIME)
+
 
 # --- Simple in-memory rate limiter ---
 _rate_store: dict[str, list[float]] = defaultdict(list)
@@ -97,9 +118,21 @@ RATE_LIMIT_RPM = int(os.getenv("RATE_LIMIT_RPM", "30"))  # requests per minute
 
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
-    # Only rate limit mutating endpoints
+    client_ip = request.client.host if request.client else "unknown"
+
+    # Fail2ban check — block banned IPs
+    if client_ip in _banned_ips:
+        banned_at = _banned_ips[client_ip]
+        if time.time() - banned_at < FAIL2BAN_BAN_TIME:
+            return JSONResponse(
+                status_code=403,
+                content={"detail": "IP temporarily banned due to repeated failed login attempts."},
+            )
+        else:
+            del _banned_ips[client_ip]
+
+    # Rate limit mutating endpoints
     if request.url.path in ("/api/refresh",) and request.method == "POST":
-        client_ip = request.client.host if request.client else "unknown"
         now = time.time()
         window = 60.0
 

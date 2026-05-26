@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberNews — Cybersecurity News Aggregator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+</head>
+<body>
+    <!-- Toast container -->
+    <div id="toast-container"></div>
+
+    <!-- Mobile sidebar toggle -->
+    <button id="sidebar-toggle" class="sidebar-toggle" aria-label="Toggle sidebar">
+        <span></span><span></span><span></span>
+    </button>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <h1 class="logo">🛡️ <span>CyberNews</span></h1>
+        </div>
+
+        <div class="sidebar-section">
+            <h3>Categories</h3>
+            <nav id="category-nav" class="category-nav">
+                <button class="cat-btn active" data-category="all">
+                    <span class="cat-icon">📡</span> All
+                    <span class="cat-count" id="count-all">0</span>
+                </button>
+                <button class="cat-btn" data-category="cve">
+                    <span class="cat-icon">🔴</span> CVE / Vulns
+                    <span class="cat-count" id="count-cve">0</span>
+                </button>
+                <button class="cat-btn" data-category="redteam">
+                    <span class="cat-icon">🔓</span> Red Team / Pentest
+                    <span class="cat-count" id="count-redteam">0</span>
+                </button>
+                <button class="cat-btn" data-category="threat-intel">
+                    <span class="cat-icon">🕵️</span> Threat Intel
+                    <span class="cat-count" id="count-threat-intel">0</span>
+                </button>
+                <button class="cat-btn" data-category="news">
+                    <span class="cat-icon">📰</span> News
+                    <span class="cat-count" id="count-news">0</span>
+                </button>
+                <button class="cat-btn" data-category="government">
+                    <span class="cat-icon">🏛️</span> Government
+                    <span class="cat-count" id="count-government">0</span>
+                </button>
+                <button class="cat-btn" data-category="research">
+                    <span class="cat-icon">🔬</span> Research
+                    <span class="cat-count" id="count-research">0</span>
+                </button>
+            </nav>
+        </div>
+
+        <div class="sidebar-section">
+            <h3>Filters</h3>
+            <label class="toggle-filter">
+                <input type="checkbox" id="poc-filter"> 
+                <span class="toggle-slider"></span>
+                PoC Available Only
+            </label>
+        </div>
+
+        <div class="sidebar-section">
+            <h3>Sources
+                <button id="source-mgmt-btn" class="btn-sm" title="Manage Sources">⚙️</button>
+            </h3>
+            <div id="source-list" class="source-list"></div>
+        </div>
+
+        <div class="sidebar-footer">
+            <button id="opml-export" class="btn-action">📥 Export OPML</button>
+            <button id="discover-btn" class="btn-action">🔍 Discover Sources</button>
+        </div>
+    </aside>
+
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- Main content -->
+    <main id="main" class="main">
+        <!-- Header -->
+        <header class="header">
+            <div class="search-container">
+                <input type="text" id="search-input" class="search-input" placeholder="Search articles...">
+            </div>
+            <div class="header-actions">
+                <div class="stats-bar">
+                    <span id="stats-articles" class="stat-chip">0 articles</span>
+                    <span id="stats-sources" class="stat-chip">0 sources</span>
+                    <span id="stats-cves" class="stat-chip">0 CVEs</span>
+                </div>
+                <div class="refresh-info">
+                    <span id="last-updated" class="last-updated mono">--</span>
+                    <button id="refresh-btn" class="btn-refresh" title="Refresh feeds">⟳</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Article grid -->
+        <div id="article-grid" class="article-grid">
+            <!-- Skeleton cards shown during loading -->
+        </div>
+
+        <!-- Empty state -->
+        <div id="empty-state" class="empty-state hidden">
+            <div class="empty-icon">📭</div>
+            <h3>No articles found</h3>
+            <p id="empty-message">Try adjusting your filters or search query.</p>
+        </div>
+
+        <!-- Pagination -->
+        <div id="pagination" class="pagination hidden">
+            <button id="prev-page" class="btn-page">← Previous</button>
+            <span id="page-info" class="page-info mono">Page 1</span>
+            <button id="next-page" class="btn-page">Next →</button>
+        </div>
+
+        <!-- Loading overlay -->
+        <div id="loading-overlay" class="loading-overlay hidden">
+            <div class="spinner"></div>
+        </div>
+    </main>
+
+    <!-- Source Management Modal -->
+    <div id="source-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Source Management</h2>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="add-source-form">
+                    <h3>Add Custom Source</h3>
+                    <input type="text" id="new-source-name" placeholder="Source name" class="input">
+                    <input type="url" id="new-source-url" placeholder="RSS/Atom URL or website URL" class="input">
+                    <select id="new-source-category" class="input">
+                        <option value="news">News</option>
+                        <option value="cve">CVE / Vulns</option>
+                        <option value="redteam">Red Team</option>
+                        <option value="threat-intel">Threat Intel</option>
+                        <option value="government">Government</option>
+                        <option value="research">Research</option>
+                    </select>
+                    <button id="add-source-btn" class="btn-primary">Add Source</button>
+                </div>
+                <div class="source-table-container">
+                    <h3>All Sources</h3>
+                    <table id="source-table" class="source-table">
+                        <thead>
+                            <tr>
+                                <th>Enabled</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Articles</th>
+                                <th>Last Fetch</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="source-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Discover Modal -->
+    <div id="discover-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔍 Discover New Sources</h2>
+                <button class="modal-close" id="discover-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="discover-loading" class="discover-loading">
+                    <div class="spinner"></div>
+                    <p>Scanning curated feed lists...</p>
+                </div>
+                <div id="discover-results" class="discover-results hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

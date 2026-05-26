@@ -38,7 +38,7 @@ Open **http://localhost:8080** in your browser.
 ```
 ┌──────────────┐     ┌──────────────────┐     ┌────────────┐
 │   Browser    │────▶│  nginx (frontend) │────▶│  FastAPI    │
-│              │     │  :8080            │     │  (backend)  │
+│              │     │  :80 / :443 (TLS)│     │  (backend)  │
 │  Vanilla JS  │     │  /api/* → proxy   │     │  :8000      │
 └──────────────┘     └──────────────────┘     └─────┬──────┘
                                                      │
@@ -51,7 +51,8 @@ Open **http://localhost:8080** in your browser.
                                           │  APScheduler       │
                                           │  ├─ Feed refresh   │
                                           │  ├─ CVE enrichment │
-                                          │  └─ KEV catalog    │
+                                          │  ├─ KEV catalog    │
+                                          │  └─ Article cleanup│
                                           └───────────────────┘
 ```
 

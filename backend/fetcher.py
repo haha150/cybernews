@@ -90,6 +90,7 @@ async def fetch_source(source: dict) -> int:
             timeout=30.0,
             follow_redirects=True,
             headers={"User-Agent": USER_AGENT},
+            verify=False,
         ) as client:
             resp = await client.get(url)
             status = resp.status_code
@@ -173,6 +174,7 @@ async def discover_feed_url(url: str) -> str | None:
             timeout=15.0,
             follow_redirects=True,
             headers={"User-Agent": USER_AGENT},
+            verify=False,
         ) as client:
             resp = await client.get(url)
             if resp.status_code != 200:

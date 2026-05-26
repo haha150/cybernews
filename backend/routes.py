@@ -162,6 +162,7 @@ async def discover_sources():
         timeout=20.0,
         follow_redirects=True,
         headers={"User-Agent": USER_AGENT},
+        verify=False,
     ) as client:
         for url in discovery_urls:
             try:

@@ -15,9 +15,9 @@
     --amber: #d29922;
     --yellow: #e3b341;
     --purple: #bc8cff;
-    --text-primary: #e6edf3;
-    --text-secondary: #b1bac4;
-    --text-muted: #8b949e;
+    --text-primary: #ffffff;
+    --text-secondary: #e0e0e0;
+    --text-muted: #c0c0c0;
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
     --sidebar-width: 280px;

@@ -6,7 +6,10 @@
       "url": "https://feeds.feedburner.com/TheHackersNews",
       "category": "news",
       "enabled": true,
-      "tags": ["breaking", "cybersecurity"]
+      "tags": [
+        "breaking",
+        "cybersecurity"
+      ]
     },
     {
       "id": "bleepingcomputer",
@@ -14,7 +17,10 @@
       "url": "https://www.bleepingcomputer.com/feed/",
       "category": "news",
       "enabled": true,
-      "tags": ["breaking", "malware"]
+      "tags": [
+        "breaking",
+        "malware"
+      ]
     },
     {
       "id": "darkreading",
@@ -22,7 +28,10 @@
       "url": "https://www.darkreading.com/rss_simple.asp",
       "category": "news",
       "enabled": true,
-      "tags": ["enterprise", "security"]
+      "tags": [
+        "enterprise",
+        "security"
+      ]
     },
     {
       "id": "securityweek",
@@ -30,7 +39,10 @@
       "url": "https://feeds.feedburner.com/securityweek",
       "category": "news",
       "enabled": true,
-      "tags": ["enterprise", "news"]
+      "tags": [
+        "enterprise",
+        "news"
+      ]
     },
     {
       "id": "krebsonsecurity",
@@ -38,7 +50,10 @@
       "url": "https://krebsonsecurity.com/feed/",
       "category": "news",
       "enabled": true,
-      "tags": ["investigative", "cybercrime"]
+      "tags": [
+        "investigative",
+        "cybercrime"
+      ]
     },
     {
       "id": "cyberscoop",
@@ -46,7 +61,10 @@
       "url": "https://www.cyberscoop.com/feed",
       "category": "news",
       "enabled": true,
-      "tags": ["policy", "news"]
+      "tags": [
+        "policy",
+        "news"
+      ]
     },
     {
       "id": "therecord",
@@ -54,7 +72,10 @@
       "url": "https://therecord.media/feed/",
       "category": "news",
       "enabled": true,
-      "tags": ["threat-intel", "news"]
+      "tags": [
+        "threat-intel",
+        "news"
+      ]
     },
     {
       "id": "arstechnica_security",
@@ -62,7 +83,10 @@
       "url": "https://arstechnica.com/tag/security/feed",
       "category": "news",
       "enabled": true,
-      "tags": ["tech", "security"]
+      "tags": [
+        "tech",
+        "security"
+      ]
     },
     {
       "id": "wired_security",
@@ -70,7 +94,10 @@
       "url": "https://www.wired.com/feed/category/security/latest/rss",
       "category": "news",
       "enabled": true,
-      "tags": ["tech", "security"]
+      "tags": [
+        "tech",
+        "security"
+      ]
     },
     {
       "id": "helpnetsecurity",
@@ -78,7 +105,10 @@
       "url": "https://www.helpnetsecurity.com/feed",
       "category": "news",
       "enabled": true,
-      "tags": ["news", "tools"]
+      "tags": [
+        "news",
+        "tools"
+      ]
     },
     {
       "id": "infosecuritymag",
@@ -86,7 +116,10 @@
       "url": "https://www.infosecurity-magazine.com/rss/news",
       "category": "news",
       "enabled": true,
-      "tags": ["news", "enterprise"]
+      "tags": [
+        "news",
+        "enterprise"
+      ]
     },
     {
       "id": "cybersecuritynews",
@@ -94,7 +127,10 @@
       "url": "https://cybersecuritynews.com/feed/",
       "category": "news",
       "enabled": true,
-      "tags": ["news", "vulnerabilities"]
+      "tags": [
+        "news",
+        "vulnerabilities"
+      ]
     },
     {
       "id": "securityaffairs",
@@ -102,7 +138,10 @@
       "url": "http://securityaffairs.co/wordpress/feed",
       "category": "news",
       "enabled": true,
-      "tags": ["news", "hacking"]
+      "tags": [
+        "news",
+        "hacking"
+      ]
     },
     {
       "id": "gbhackers",
@@ -110,7 +149,10 @@
       "url": "http://feeds.feedburner.com/gbhackers",
       "category": "news",
       "enabled": true,
-      "tags": ["news", "vulnerabilities"]
+      "tags": [
+        "news",
+        "vulnerabilities"
+      ]
     },
     {
       "id": "hackread",
@@ -118,7 +160,10 @@
       "url": "https://www.hackread.com/feed",
       "category": "news",
       "enabled": true,
-      "tags": ["news", "data-breaches"]
+      "tags": [
+        "news",
+        "data-breaches"
+      ]
     },
     {
       "id": "cybersecuritydive",
@@ -126,7 +171,10 @@
       "url": "https://www.cybersecuritydive.com/feeds/news/",
       "category": "news",
       "enabled": true,
-      "tags": ["enterprise", "news"]
+      "tags": [
+        "enterprise",
+        "news"
+      ]
     },
     {
       "id": "csoonline",
@@ -134,7 +182,10 @@
       "url": "https://www.csoonline.com/feed/",
       "category": "news",
       "enabled": true,
-      "tags": ["enterprise", "ciso"]
+      "tags": [
+        "enterprise",
+        "ciso"
+      ]
     },
     {
       "id": "zdnet_security",
@@ -142,7 +193,10 @@
       "url": "https://www.zdnet.com/topic/security/rss.xml",
       "category": "news",
       "enabled": true,
-      "tags": ["tech", "security"]
+      "tags": [
+        "tech",
+        "security"
+      ]
     },
     {
       "id": "scmagazine",
@@ -150,7 +204,10 @@
       "url": "https://www.scmagazine.com/feed/topic/threats",
       "category": "news",
       "enabled": true,
-      "tags": ["threats", "news"]
+      "tags": [
+        "threats",
+        "news"
+      ]
     },
     {
       "id": "securityboulevard",
@@ -158,7 +215,10 @@
       "url": "https://securityboulevard.com/feed/",
       "category": "news",
       "enabled": true,
-      "tags": ["news", "community"]
+      "tags": [
+        "news",
+        "community"
+      ]
     },
     {
       "id": "theverge_security",
@@ -166,7 +226,10 @@
       "url": "https://www.theverge.com/security/rss/index.xml",
       "category": "news",
       "enabled": true,
-      "tags": ["tech", "security"]
+      "tags": [
+        "tech",
+        "security"
+      ]
     },
     {
       "id": "cisa_advisories",
@@ -174,7 +237,10 @@
       "url": "https://www.cisa.gov/cybersecurity-advisories/all.xml",
       "category": "cve",
       "enabled": true,
-      "tags": ["government", "advisories"]
+      "tags": [
+        "government",
+        "advisories"
+      ]
     },
     {
       "id": "cisa_ics",
@@ -182,7 +248,10 @@
       "url": "https://www.cisa.gov/ics-advisories.xml",
       "category": "cve",
       "enabled": true,
-      "tags": ["ics", "scada"]
+      "tags": [
+        "ics",
+        "scada"
+      ]
     },
     {
       "id": "nvd_cve",
@@ -190,7 +259,10 @@
       "url": "https://nvd.nist.gov/feeds/xml/cve/misc/nvd-rss-analyzed.xml",
       "category": "cve",
       "enabled": true,
-      "tags": ["cve", "nist"]
+      "tags": [
+        "cve",
+        "nist"
+      ]
     },
     {
       "id": "cvefeed_high",
@@ -198,7 +270,10 @@
       "url": "https://cvefeed.io/rssfeed/severity/high.xml",
       "category": "cve",
       "enabled": true,
-      "tags": ["cve", "high"]
+      "tags": [
+        "cve",
+        "high"
+      ]
     },
     {
       "id": "cvefeed_critical",
@@ -206,7 +281,10 @@
       "url": "https://cvefeed.io/rssfeed/severity/critical.xml",
       "category": "cve",
       "enabled": true,
-      "tags": ["cve", "critical"]
+      "tags": [
+        "cve",
+        "critical"
+      ]
     },
     {
       "id": "cve_kev_rss",
@@ -214,7 +292,10 @@
       "url": "https://raw.githubusercontent.com/CryptoGenNepal/CVE-KEV-RSS/main/feed.xml",
       "category": "cve",
       "enabled": true,
-      "tags": ["kev", "cve"]
+      "tags": [
+        "kev",
+        "cve"
+      ]
     },
     {
       "id": "exploitdb",
@@ -222,7 +303,10 @@
       "url": "https://www.exploit-db.com/rss.xml",
       "category": "cve",
       "enabled": true,
-      "tags": ["exploits", "poc"]
+      "tags": [
+        "exploits",
+        "poc"
+      ]
     },
     {
       "id": "packetstorm",
@@ -230,7 +314,10 @@
       "url": "https://rss.packetstormsecurity.com/",
       "category": "cve",
       "enabled": true,
-      "tags": ["exploits", "advisories"]
+      "tags": [
+        "exploits",
+        "advisories"
+      ]
     },
     {
       "id": "zdi_published",
@@ -238,7 +325,10 @@
       "url": "https://www.zerodayinitiative.com/rss/published/",
       "category": "cve",
       "enabled": true,
-      "tags": ["zero-day", "vulnerabilities"]
+      "tags": [
+        "zero-day",
+        "vulnerabilities"
+      ]
     },
     {
       "id": "zdi_upcoming",
@@ -246,7 +336,10 @@
       "url": "https://www.zerodayinitiative.com/rss/upcoming/",
       "category": "cve",
       "enabled": true,
-      "tags": ["zero-day", "upcoming"]
+      "tags": [
+        "zero-day",
+        "upcoming"
+      ]
     },
     {
       "id": "certcc",
@@ -254,7 +347,10 @@
       "url": "https://www.kb.cert.org/vulfeed/",
       "category": "cve",
       "enabled": true,
-      "tags": ["cert", "vulnerabilities"]
+      "tags": [
+        "cert",
+        "vulnerabilities"
+      ]
     },
     {
       "id": "msrc",
@@ -262,7 +358,10 @@
       "url": "https://api.msrc.microsoft.com/update-guide/rss",
       "category": "cve",
       "enabled": true,
-      "tags": ["microsoft", "patches"]
+      "tags": [
+        "microsoft",
+        "patches"
+      ]
     },
     {
       "id": "ncsc_uk",
@@ -270,7 +369,10 @@
       "url": "https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml",
       "category": "cve",
       "enabled": true,
-      "tags": ["uk", "government"]
+      "tags": [
+        "uk",
+        "government"
+      ]
     },
     {
       "id": "tenable_research",
@@ -278,7 +380,10 @@
       "url": "https://www.tenable.com/security/research/feed",
       "category": "cve",
       "enabled": true,
-      "tags": ["research", "vulnerabilities"]
+      "tags": [
+        "research",
+        "vulnerabilities"
+      ]
     },
     {
       "id": "rapid7",
@@ -286,7 +391,10 @@
       "url": "https://blog.rapid7.com/rss/",
       "category": "cve",
       "enabled": true,
-      "tags": ["research", "vulnerabilities"]
+      "tags": [
+        "research",
+        "vulnerabilities"
+      ]
     },
     {
       "id": "fortinet_threatsignal",
@@ -294,7 +402,10 @@
       "url": "https://filestore.fortinet.com/fortiguard/rss/threatsignal.xml",
       "category": "cve",
       "enabled": true,
-      "tags": ["fortinet", "threats"]
+      "tags": [
+        "fortinet",
+        "threats"
+      ]
     },
     {
       "id": "github_advisories",
@@ -302,7 +413,10 @@
       "url": "https://github.com/advisories.atom",
       "category": "cve",
       "enabled": true,
-      "tags": ["github", "advisories"]
+      "tags": [
+        "github",
+        "advisories"
+      ]
     },
     {
       "id": "sploitus",
@@ -310,7 +424,10 @@
       "url": "https://sploitus.com/rss",
       "category": "cve",
       "enabled": true,
-      "tags": ["exploits", "poc"]
+      "tags": [
+        "exploits",
+        "poc"
+      ]
     },
     {
       "id": "sans_isc",
@@ -318,7 +435,10 @@
       "url": "https://isc.sans.edu/rssfeed.xml",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["isc", "handlers"]
+      "tags": [
+        "isc",
+        "handlers"
+      ]
     },
     {
       "id": "cisco_talos",
@@ -326,7 +446,10 @@
       "url": "https://feeds.feedburner.com/feedburner/Talos",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["threat-intel", "malware"]
+      "tags": [
+        "threat-intel",
+        "malware"
+      ]
     },
     {
       "id": "securelist",
@@ -334,7 +457,10 @@
       "url": "https://securelist.com/feed/",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["apt", "malware"]
+      "tags": [
+        "apt",
+        "malware"
+      ]
     },
     {
       "id": "google_projectzero",
@@ -342,7 +468,10 @@
       "url": "https://googleprojectzero.blogspot.com/feeds/posts/default?alt=rss",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["zero-day", "research"]
+      "tags": [
+        "zero-day",
+        "research"
+      ]
     },
     {
       "id": "checkpoint_research",
@@ -350,7 +479,10 @@
       "url": "https://research.checkpoint.com/feed",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["malware", "research"]
+      "tags": [
+        "malware",
+        "research"
+      ]
     },
     {
       "id": "crowdstrike",
@@ -358,7 +490,10 @@
       "url": "https://www.crowdstrike.com/blog/feed",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["threat-intel", "edr"]
+      "tags": [
+        "threat-intel",
+        "edr"
+      ]
     },
     {
       "id": "microsoft_security",
@@ -366,7 +501,10 @@
       "url": "https://www.microsoft.com/security/blog/feed",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["microsoft", "threat-intel"]
+      "tags": [
+        "microsoft",
+        "threat-intel"
+      ]
     },
     {
       "id": "malwarebytes",
@@ -374,7 +512,10 @@
       "url": "https://blog.malwarebytes.com/feed/",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["malware", "ransomware"]
+      "tags": [
+        "malware",
+        "ransomware"
+      ]
     },
     {
       "id": "welivesecurity",
@@ -382,7 +523,10 @@
       "url": "https://www.welivesecurity.com/feed/",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["malware", "apt"]
+      "tags": [
+        "malware",
+        "apt"
+      ]
     },
     {
       "id": "sentinelone",
@@ -390,7 +534,10 @@
       "url": "https://www.sentinelone.com/feed/",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["edr", "threat-intel"]
+      "tags": [
+        "edr",
+        "threat-intel"
+      ]
     },
     {
       "id": "dfirreport",
@@ -398,7 +545,10 @@
       "url": "https://thedfirreport.com/feed/",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["dfir", "incident-response"]
+      "tags": [
+        "dfir",
+        "incident-response"
+      ]
     },
     {
       "id": "socradar",
@@ -406,7 +556,10 @@
       "url": "https://socradar.io/feed/",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["threat-intel", "dark-web"]
+      "tags": [
+        "threat-intel",
+        "dark-web"
+      ]
     },
     {
       "id": "recordedfuture_blog",
@@ -414,7 +567,10 @@
       "url": "https://www.recordedfuture.com/feed",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["threat-intel", "research"]
+      "tags": [
+        "threat-intel",
+        "research"
+      ]
     },
     {
       "id": "datadog_security",
@@ -422,7 +578,10 @@
       "url": "https://securitylabs.datadoghq.com/rss/feed.xml",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["cloud", "security"]
+      "tags": [
+        "cloud",
+        "security"
+      ]
     },
     {
       "id": "nccgroup",
@@ -430,7 +589,10 @@
       "url": "https://research.nccgroup.com/feed",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["research", "consulting"]
+      "tags": [
+        "research",
+        "consulting"
+      ]
     },
     {
       "id": "nviso",
@@ -438,7 +600,10 @@
       "url": "https://blog.nviso.eu/feed",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["research", "malware"]
+      "tags": [
+        "research",
+        "malware"
+      ]
     },
     {
       "id": "sekoia",
@@ -446,7 +611,10 @@
       "url": "https://blog.sekoia.io/feed/",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["threat-intel", "cti"]
+      "tags": [
+        "threat-intel",
+        "cti"
+      ]
     },
     {
       "id": "specterops",
@@ -454,7 +622,10 @@
       "url": "https://posts.specterops.io/feed",
       "category": "redteam",
       "enabled": true,
-      "tags": ["red-team", "active-directory"]
+      "tags": [
+        "red-team",
+        "active-directory"
+      ]
     },
     {
       "id": "offsec_blog",
@@ -462,7 +633,10 @@
       "url": "https://www.offensive-security.com/blog/feed",
       "category": "redteam",
       "enabled": true,
-      "tags": ["offsec", "pentest"]
+      "tags": [
+        "offsec",
+        "pentest"
+      ]
     },
     {
       "id": "bishopfox",
@@ -470,15 +644,21 @@
       "url": "https://bishopfox.com/feeds/blog.rss",
       "category": "redteam",
       "enabled": true,
-      "tags": ["pentest", "consulting"]
+      "tags": [
+        "pentest",
+        "consulting"
+      ]
     },
     {
       "id": "htb_redteaming",
-      "name": "Hack The Box – Red Teaming",
+      "name": "Hack The Box \u2013 Red Teaming",
       "url": "https://www.hackthebox.com/rss/blog/red-teaming",
       "category": "redteam",
       "enabled": true,
-      "tags": ["ctf", "red-team"]
+      "tags": [
+        "ctf",
+        "red-team"
+      ]
     },
     {
       "id": "kitploit",
@@ -486,7 +666,10 @@
       "url": "http://feeds.feedburner.com/PentestTools",
       "category": "redteam",
       "enabled": true,
-      "tags": ["tools", "pentest"]
+      "tags": [
+        "tools",
+        "pentest"
+      ]
     },
     {
       "id": "praetorian",
@@ -494,7 +677,10 @@
       "url": "https://www.praetorian.com/blog/feed/",
       "category": "redteam",
       "enabled": true,
-      "tags": ["red-team", "research"]
+      "tags": [
+        "red-team",
+        "research"
+      ]
     },
     {
       "id": "pentestpartners",
@@ -502,7 +688,10 @@
       "url": "https://www.pentestpartners.com/feed",
       "category": "redteam",
       "enabled": true,
-      "tags": ["iot", "pentest"]
+      "tags": [
+        "iot",
+        "pentest"
+      ]
     },
     {
       "id": "hackingthecloud",
@@ -510,7 +699,10 @@
       "url": "https://hackingthe.cloud/feed_rss_created.xml",
       "category": "redteam",
       "enabled": true,
-      "tags": ["cloud", "aws"]
+      "tags": [
+        "cloud",
+        "aws"
+      ]
     },
     {
       "id": "portswigger_research",
@@ -518,7 +710,10 @@
       "url": "https://portswigger.net/research/rss",
       "category": "redteam",
       "enabled": true,
-      "tags": ["web", "appsec"]
+      "tags": [
+        "web",
+        "appsec"
+      ]
     },
     {
       "id": "spiderlabs",
@@ -526,7 +721,10 @@
       "url": "https://www.trustwave.com/en-us/rss/spiderlabs-blog/",
       "category": "redteam",
       "enabled": true,
-      "tags": ["pentest", "research"]
+      "tags": [
+        "pentest",
+        "research"
+      ]
     },
     {
       "id": "compass_security",
@@ -534,7 +732,10 @@
       "url": "https://blog.compass-security.com/feed/",
       "category": "redteam",
       "enabled": true,
-      "tags": ["pentest", "research"]
+      "tags": [
+        "pentest",
+        "research"
+      ]
     },
     {
       "id": "embracethered",
@@ -542,7 +743,10 @@
       "url": "https://embracethered.com/blog/index.xml",
       "category": "redteam",
       "enabled": true,
-      "tags": ["ai-security", "red-team"]
+      "tags": [
+        "ai-security",
+        "red-team"
+      ]
     },
     {
       "id": "hackerone",
@@ -550,7 +754,10 @@
       "url": "https://www.hackerone.com/blog.rss",
       "category": "redteam",
       "enabled": true,
-      "tags": ["bug-bounty", "disclosure"]
+      "tags": [
+        "bug-bounty",
+        "disclosure"
+      ]
     },
     {
       "id": "google_security",
@@ -558,7 +765,10 @@
       "url": "https://googleonlinesecurity.blogspot.com/atom.xml",
       "category": "research",
       "enabled": true,
-      "tags": ["google", "research"]
+      "tags": [
+        "google",
+        "research"
+      ]
     },
     {
       "id": "arxiv_cscr",
@@ -566,15 +776,21 @@
       "url": "https://export.arxiv.org/rss/cs.CR/",
       "category": "research",
       "enabled": true,
-      "tags": ["academic", "crypto"]
+      "tags": [
+        "academic",
+        "crypto"
+      ]
     },
     {
       "id": "mit_cybersec",
-      "name": "MIT News – Cybersecurity",
+      "name": "MIT News \u2013 Cybersecurity",
       "url": "https://news.mit.edu/topic/mitcyber-security-rss.xml",
       "category": "research",
       "enabled": true,
-      "tags": ["academic", "research"]
+      "tags": [
+        "academic",
+        "research"
+      ]
     },
     {
       "id": "citizenlab",
@@ -582,7 +798,10 @@
       "url": "https://citizenlab.ca/feed/",
       "category": "research",
       "enabled": true,
-      "tags": ["surveillance", "human-rights"]
+      "tags": [
+        "surveillance",
+        "human-rights"
+      ]
     },
     {
       "id": "lightbluetouchpaper",
@@ -590,7 +809,10 @@
       "url": "https://www.lightbluetouchpaper.org/feed/",
       "category": "research",
       "enabled": true,
-      "tags": ["academic", "cambridge"]
+      "tags": [
+        "academic",
+        "cambridge"
+      ]
     },
     {
       "id": "nist_blog",
@@ -598,7 +820,10 @@
       "url": "https://www.nist.gov/blogs/cybersecurity-insights/rss.xml",
       "category": "research",
       "enabled": true,
-      "tags": ["nist", "frameworks"]
+      "tags": [
+        "nist",
+        "frameworks"
+      ]
     },
     {
       "id": "reddit_netsec",
@@ -606,7 +831,10 @@
       "url": "https://www.reddit.com/r/netsec.rss",
       "category": "news",
       "enabled": true,
-      "tags": ["community", "reddit"]
+      "tags": [
+        "community",
+        "reddit"
+      ]
     },
     {
       "id": "reddit_cybersecurity",
@@ -614,7 +842,10 @@
       "url": "https://www.reddit.com/r/cybersecurity.rss",
       "category": "news",
       "enabled": true,
-      "tags": ["community", "reddit"]
+      "tags": [
+        "community",
+        "reddit"
+      ]
     },
     {
       "id": "reddit_blueteamsec",
@@ -622,7 +853,10 @@
       "url": "https://www.reddit.com/r/blueteamsec.rss",
       "category": "news",
       "enabled": true,
-      "tags": ["blue-team", "reddit"]
+      "tags": [
+        "blue-team",
+        "reddit"
+      ]
     },
     {
       "id": "hn_security",
@@ -630,7 +864,10 @@
       "url": "https://hnrss.org/newest?q=security+OR+vulnerability+OR+exploit",
       "category": "news",
       "enabled": true,
-      "tags": ["community", "hn"]
+      "tags": [
+        "community",
+        "hn"
+      ]
     },
     {
       "id": "hn_frontpage",
@@ -638,7 +875,10 @@
       "url": "https://news.ycombinator.com/rss",
       "category": "news",
       "enabled": false,
-      "tags": ["community", "hn"]
+      "tags": [
+        "community",
+        "hn"
+      ]
     },
     {
       "id": "cisa_blog",
@@ -646,7 +886,10 @@
       "url": "https://www.cisa.gov/cisa/blog.xml",
       "category": "government",
       "enabled": true,
-      "tags": ["government", "policy"]
+      "tags": [
+        "government",
+        "policy"
+      ]
     },
     {
       "id": "cisa_news",
@@ -654,7 +897,10 @@
       "url": "https://www.cisa.gov/news.xml",
       "category": "government",
       "enabled": true,
-      "tags": ["government", "news"]
+      "tags": [
+        "government",
+        "news"
+      ]
     },
     {
       "id": "ncsc_uk_guidance",
@@ -662,7 +908,10 @@
       "url": "https://www.ncsc.gov.uk/api/1/services/v1/guidance-rss-feed.xml",
       "category": "government",
       "enabled": true,
-      "tags": ["uk", "guidance"]
+      "tags": [
+        "uk",
+        "guidance"
+      ]
     },
     {
       "id": "eff_deeplinks",
@@ -670,7 +919,10 @@
       "url": "https://www.eff.org/rss/updates.xml",
       "category": "government",
       "enabled": true,
-      "tags": ["privacy", "policy"]
+      "tags": [
+        "privacy",
+        "policy"
+      ]
     },
     {
       "id": "kali_linux",
@@ -678,7 +930,10 @@
       "url": "https://www.kali.org/rss.xml",
       "category": "redteam",
       "enabled": true,
-      "tags": ["tools", "distro"]
+      "tags": [
+        "tools",
+        "distro"
+      ]
     },
     {
       "id": "github_security_blog",
@@ -686,7 +941,10 @@
       "url": "https://github.blog/category/security/feed/",
       "category": "news",
       "enabled": true,
-      "tags": ["github", "supply-chain"]
+      "tags": [
+        "github",
+        "supply-chain"
+      ]
     },
     {
       "id": "schneier",
@@ -694,7 +952,10 @@
       "url": "https://www.schneier.com/feed/atom",
       "category": "news",
       "enabled": true,
-      "tags": ["crypto", "policy"]
+      "tags": [
+        "crypto",
+        "policy"
+      ]
     },
     {
       "id": "grahamcluley",
@@ -702,7 +963,10 @@
       "url": "https://www.grahamcluley.com/feed/",
       "category": "news",
       "enabled": true,
-      "tags": ["commentary", "news"]
+      "tags": [
+        "commentary",
+        "news"
+      ]
     },
     {
       "id": "troyhunt",
@@ -710,7 +974,10 @@
       "url": "https://www.troyhunt.com/rss/",
       "category": "news",
       "enabled": true,
-      "tags": ["breaches", "hibp"]
+      "tags": [
+        "breaches",
+        "hibp"
+      ]
     },
     {
       "id": "projectdiscovery",
@@ -718,7 +985,10 @@
       "url": "https://projectdiscovery.io/blog/rss.xml",
       "category": "redteam",
       "enabled": true,
-      "tags": ["tools", "nuclei"]
+      "tags": [
+        "tools",
+        "nuclei"
+      ]
     },
     {
       "id": "elastic_security_labs",
@@ -726,7 +996,11 @@
       "url": "https://www.elastic.co/security-labs/rss/feed.xml",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["detection", "malware", "research"]
+      "tags": [
+        "detection",
+        "malware",
+        "research"
+      ]
     },
     {
       "id": "huntress",
@@ -734,7 +1008,11 @@
       "url": "https://www.huntress.com/blog/rss.xml",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["msp", "incident-response", "malware"]
+      "tags": [
+        "msp",
+        "incident-response",
+        "malware"
+      ]
     },
     {
       "id": "jpcert",
@@ -742,7 +1020,11 @@
       "url": "https://blogs.jpcert.or.jp/en/atom.xml",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["apt", "japan", "incident-response"]
+      "tags": [
+        "apt",
+        "japan",
+        "incident-response"
+      ]
     },
     {
       "id": "google_threat_intel",
@@ -750,7 +1032,11 @@
       "url": "https://cloudblog.withgoogle.com/topics/threat-intelligence/rss/",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["apt", "mandiant", "research"]
+      "tags": [
+        "apt",
+        "mandiant",
+        "research"
+      ]
     },
     {
       "id": "unit42",
@@ -758,7 +1044,687 @@
       "url": "https://unit42.paloaltonetworks.com/feed/",
       "category": "threat-intel",
       "enabled": true,
-      "tags": ["apt", "malware", "research"]
+      "tags": [
+        "apt",
+        "malware",
+        "research"
+      ]
+    },
+    {
+      "id": "atomic_red_team",
+      "name": "Atomic Red Team",
+      "url": "https://github.com/redcanaryco/atomic-red-team/releases.atom",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "mitre",
+        "testing"
+      ]
+    },
+    {
+      "id": "bad_sector_labs",
+      "name": "Bad Sector Labs Blog",
+      "url": "https://badsectorlabs.com/feed/",
+      "category": "news",
+      "enabled": true,
+      "tags": [
+        "security",
+        "exploits"
+      ]
+    },
+    {
+      "id": "bhis",
+      "name": "Black Hills Information Security",
+      "url": "https://www.blackhillsinfosec.com/feed/",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "pentest",
+        "podcast"
+      ]
+    },
+    {
+      "id": "blue_team_medium",
+      "name": "Blue Team on Medium",
+      "url": "https://medium.com/feed/tag/blue-team",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": [
+        "blue-team",
+        "defense"
+      ]
+    },
+    {
+      "id": "bug_bounty_medium",
+      "name": "Bug Bounty on Medium",
+      "url": "https://medium.com/feed/tag/bug-bounty",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "bug-bounty"
+      ]
+    },
+    {
+      "id": "google_cloud_blog",
+      "name": "Google Cloud Blog",
+      "url": "https://cloudblog.withgoogle.com/rss/",
+      "category": "news",
+      "enabled": true,
+      "tags": [
+        "cloud",
+        "google"
+      ]
+    },
+    {
+      "id": "cloudseclist",
+      "name": "CloudSecList",
+      "url": "https://cloudseclist.com/feed.xml",
+      "category": "news",
+      "enabled": true,
+      "tags": [
+        "cloud-security"
+      ]
+    },
+    {
+      "id": "csandker",
+      "name": "csandker.io",
+      "url": "https://csandker.io/feed.xml",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "security",
+        "hacks"
+      ]
+    },
+    {
+      "id": "cyber_arms",
+      "name": "CYBER ARMS",
+      "url": "https://cyberarms.wordpress.com/feed/",
+      "category": "news",
+      "enabled": true,
+      "tags": [
+        "security",
+        "linux"
+      ]
+    },
+    {
+      "id": "cyberattack_medium",
+      "name": "Cyberattack on Medium",
+      "url": "https://medium.com/feed/tag/cyberattack",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": [
+        "cyberattack"
+      ]
+    },
+    {
+      "id": "daniel_chronlund",
+      "name": "Daniel Chronlund Cloud Security Blog",
+      "url": "https://danielchronlund.com/feed/",
+      "category": "news",
+      "enabled": true,
+      "tags": [
+        "azure",
+        "cloud-security"
+      ]
+    },
+    {
+      "id": "databreachtoday",
+      "name": "DataBreachToday",
+      "url": "https://www.databreachtoday.com/rss-feeds",
+      "category": "news",
+      "enabled": true,
+      "tags": [
+        "breaches"
+      ]
+    },
+    {
+      "id": "detect_fyi",
+      "name": "Detect FYI",
+      "url": "https://detect.fyi/feed",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": [
+        "detection",
+        "dfir"
+      ]
+    },
+    {
+      "id": "detection_eng_medium",
+      "name": "Detection Engineering on Medium",
+      "url": "https://medium.com/feed/tag/detection-engineering",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": [
+        "detection"
+      ]
+    },
+    {
+      "id": "detection_eng_weekly",
+      "name": "Detection Engineering Weekly",
+      "url": "https://www.detectionengineering.net/feed",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": [
+        "detection"
+      ]
+    },
+    {
+      "id": "detection_fyi",
+      "name": "Detection.FYI",
+      "url": "https://detection.fyi/index.xml",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": [
+        "detection",
+        "rules"
+      ]
+    },
+    {
+      "id": "dirteam",
+      "name": "DirTeam.com",
+      "url": "https://dirteam.com/feed/",
+      "category": "news",
+      "enabled": true,
+      "tags": [
+        "active-directory"
+      ]
+    },
+    {
+      "id": "doublepulsar",
+      "name": "DoublePulsar",
+      "url": "https://doublepulsar.com/feed",
+      "category": "news",
+      "enabled": true,
+      "tags": [
+        "security"
+      ]
+    },
+    {
+      "id": "ethical_hacking_medium",
+      "name": "Ethical Hacking on Medium",
+      "url": "https://medium.com/feed/tag/ethical-hacking",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "ethical-hacking"
+      ]
+    },
+    {
+      "id": "falconforce_medium",
+      "name": "FalconForce (Medium)",
+      "url": "https://medium.com/feed/falconforce",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "security"
+      ]
+    },
+    {
+      "id": "falconforce_blog",
+      "name": "FalconForce Blog",
+      "url": "https://falconforce.nl/feed/",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "security",
+        "pentest"
+      ]
+    },
+    {
+      "id": "hacking_articles",
+      "name": "Hacking Articles",
+      "url": "https://www.hackingarticles.in/feed/",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "pentest",
+        "tutorials"
+      ]
+    },
+    {
+      "id": "hacklido",
+      "name": "HACKLIDO",
+      "url": "https://hacklido.com/rss",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "security"
+      ]
+    },
+    {
+      "id": "incident_response_medium",
+      "name": "Incident Response on Medium",
+      "url": "https://medium.com/feed/tag/incident-response",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": [
+        "dfir"
+      ]
+    },
+    {
+      "id": "infosec_writeups",
+      "name": "InfoSec Write-ups",
+      "url": "https://infosecwriteups.com/feed",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "writeups",
+        "ctf"
+      ]
+    },
+    {
+      "id": "it_security_guru",
+      "name": "IT Security Guru",
+      "url": "https://www.itsecurityguru.org/feed/",
+      "category": "news",
+      "enabled": true,
+      "tags": [
+        "security"
+      ]
+    },
+    {
+      "id": "lockboxx",
+      "name": "LockBoxx",
+      "url": "https://lockboxx.blogspot.com/feeds/posts/default?alt=rss",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "pentest"
+      ]
+    },
+    {
+      "id": "msft_research",
+      "name": "Microsoft Research Blog",
+      "url": "https://www.microsoft.com/en-us/research/feed/",
+      "category": "research",
+      "enabled": true,
+      "tags": [
+        "ai",
+        "research"
+      ]
+    },
+    {
+      "id": "mitre_attack",
+      "name": "MITRE ATT&CK",
+      "url": "https://medium.com/feed/mitre-attack",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": [
+        "mitre",
+        "framework"
+      ]
+    },
+    {
+      "id": "pentest_lab",
+      "name": "Penetration Testing Lab",
+      "url": "https://pentestlab.blog/feed/",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "pentest"
+      ]
+    },
+    {
+      "id": "reversinglabs",
+      "name": "ReversingLabs Blog",
+      "url": "https://www.reversinglabs.com/blog/rss.xml",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": [
+        "supply-chain",
+        "threat-research"
+      ]
+    },
+    {
+      "id": "risky_biz",
+      "name": "Risky.Biz",
+      "url": "https://risky.biz/feeds/risky-business/",
+      "category": "news",
+      "enabled": true,
+      "tags": [
+        "podcast",
+        "security"
+      ]
+    },
+    {
+      "id": "s3cur3th1ssh1t",
+      "name": "S3cur3Th1sSh1t",
+      "url": "https://s3cur3th1ssh1t.github.io/feed.xml",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "pentest",
+        "red-team"
+      ]
+    },
+    {
+      "id": "google_sec_identity",
+      "name": "Security & Identity (Google Cloud)",
+      "url": "https://cloud.google.com/blog/products/identity-security/rss",
+      "category": "news",
+      "enabled": true,
+      "tags": [
+        "cloud-security",
+        "google"
+      ]
+    },
+    {
+      "id": "sentinelone_blog",
+      "name": "SentinelOne Blog",
+      "url": "https://www.sentinelone.com/blog/feed/",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": [
+        "edr",
+        "security"
+      ]
+    },
+    {
+      "id": "sigma_hq",
+      "name": "Sigma_HQ",
+      "url": "https://medium.com/feed/sigma-hq",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": [
+        "detection",
+        "sigma"
+      ]
+    },
+    {
+      "id": "sophos_blog",
+      "name": "Sophos Blogs",
+      "url": "https://www.sophos.com/en-us/blog/feed?id=blt6f15f4f7deaf4242",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": [
+        "threat-research"
+      ]
+    },
+    {
+      "id": "sources_methods",
+      "name": "Sources & Methods",
+      "url": "https://sourcesandmethods.blogspot.com/feeds/posts/default?alt=rss",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": [
+        "cti"
+      ]
+    },
+    {
+      "id": "invictus_ir",
+      "name": "Invictus Incident Response",
+      "url": "https://medium.com/feed/@invictus-ir",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": [
+        "dfir",
+        "cloud"
+      ]
+    },
+    {
+      "id": "prompt_msft",
+      "name": "THE PROMPT for Microsoft Security",
+      "url": "https://theprompt.substack.com/feed",
+      "category": "news",
+      "enabled": true,
+      "tags": [
+        "microsoft-security"
+      ]
+    },
+    {
+      "id": "red_canary",
+      "name": "The Red Canary Blog",
+      "url": "https://redcanary.com/blog/feed/",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": [
+        "detection"
+      ]
+    },
+    {
+      "id": "thinkdfir",
+      "name": "ThinkDFIR",
+      "url": "https://thinkdfir.com/feed/",
+      "category": "research",
+      "enabled": true,
+      "tags": [
+        "forensics"
+      ]
+    },
+    {
+      "id": "this_week_4n6",
+      "name": "This Week In 4n6",
+      "url": "https://thisweekin4n6.com/feed/",
+      "category": "research",
+      "enabled": true,
+      "tags": [
+        "forensics",
+        "dfir"
+      ]
+    },
+    {
+      "id": "threat_hunting_medium",
+      "name": "Threat Hunting on Medium",
+      "url": "https://medium.com/feed/tag/threat-hunting",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": [
+        "threat-hunting"
+      ]
+    },
+    {
+      "id": "threat_intel_medium",
+      "name": "Threat Intelligence on Medium",
+      "url": "https://medium.com/feed/tag/threat-intelligence",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": [
+        "threat-research"
+      ]
+    },
+    {
+      "id": "tldr_sec",
+      "name": "tl;dr sec",
+      "url": "https://tldrsec.com/feed/",
+      "category": "news",
+      "enabled": true,
+      "tags": [
+        "security"
+      ]
+    },
+    {
+      "id": "trend_micro",
+      "name": "Trend Micro Research",
+      "url": "https://blog.trendmicro.com/feed/",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": [
+        "threat-research"
+      ]
+    },
+    {
+      "id": "truesec",
+      "name": "Truesec",
+      "url": "https://www.truesec.com/hub/blog/rss",
+      "category": "news",
+      "enabled": true,
+      "tags": [
+        "security"
+      ]
+    },
+    {
+      "id": "trustedsec",
+      "name": "TrustedSec",
+      "url": "https://www.trustedsec.com/feed/",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "pentest"
+      ]
+    },
+    {
+      "id": "unsupervised_learning",
+      "name": "Unsupervised Learning",
+      "url": "https://danielmiessler.com/feed/",
+      "category": "news",
+      "enabled": true,
+      "tags": [
+        "security",
+        "ai"
+      ]
+    },
+    {
+      "id": "vectra_blog",
+      "name": "Vectra AI Blog",
+      "url": "https://www.vectra.ai/blog/rss.xml",
+      "category": "threat-intel",
+      "enabled": true,
+      "tags": [
+        "ai",
+        "detection"
+      ]
+    },
+    {
+      "id": "windows_ir",
+      "name": "Windows Incident Response",
+      "url": "https://windowsir.blogspot.com/feeds/posts/default?alt=rss",
+      "category": "research",
+      "enabled": true,
+      "tags": [
+        "forensics",
+        "windows"
+      ]
+    },
+    {
+      "id": "harmj0y",
+      "name": "harmj0y Blog",
+      "url": "https://blog.harmj0y.net/feed/",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "active-directory",
+        "powershell"
+      ]
+    },
+    {
+      "id": "rastamouse",
+      "name": "RastaMouse Blog",
+      "url": "https://rastamouse.me/feed/",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "c2",
+        "evasion"
+      ]
+    },
+    {
+      "id": "xpnsec",
+      "name": "XPN InfoSec Blog",
+      "url": "https://blog.xpnsec.com/rss/",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "exploit-dev",
+        "research"
+      ]
+    },
+    {
+      "id": "sensepost",
+      "name": "SensePost Blog",
+      "url": "https://sensepost.com/rss.xml",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "pentest"
+      ]
+    },
+    {
+      "id": "rhino_security",
+      "name": "Rhino Security Labs",
+      "url": "https://rhinosecuritylabs.com/feed/",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "aws",
+        "cloud-pentest"
+      ]
+    },
+    {
+      "id": "contagio",
+      "name": "Contagio Malware Dump",
+      "url": "https://contagiodump.blogspot.com/feeds/posts/default?alt=rss",
+      "category": "research",
+      "enabled": true,
+      "tags": [
+        "malware",
+        "samples"
+      ]
+    },
+    {
+      "id": "outflank",
+      "name": "Outflank Blog",
+      "url": "https://outflank.nl/blog/feed/",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "evasion",
+        "tooling"
+      ]
+    },
+    {
+      "id": "mdsec",
+      "name": "MDSec Blog",
+      "url": "https://www.mdsec.co.uk/feed/",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "offensive-security"
+      ]
+    },
+    {
+      "id": "didier_stevens",
+      "name": "Didier Stevens Blog",
+      "url": "https://blog.didierstevens.com/feed/",
+      "category": "research",
+      "enabled": true,
+      "tags": [
+        "malware-analysis",
+        "tools"
+      ]
+    },
+    {
+      "id": "g0tmi1k",
+      "name": "g0tmi1k Blog",
+      "url": "https://blog.g0tmi1k.com/atom.xml",
+      "category": "redteam",
+      "enabled": true,
+      "tags": [
+        "pentest",
+        "ctf"
+      ]
+    },
+    {
+      "id": "nviso_labs",
+      "name": "NVISO Labs",
+      "url": "https://blog.nviso.eu/feed/",
+      "category": "research",
+      "enabled": true,
+      "tags": [
+        "malware-analysis",
+        "detection"
+      ]
+    },
+    {
+      "id": "darknet",
+      "name": "Darknet",
+      "url": "https://www.darknet.org.uk/feed/",
+      "category": "news",
+      "enabled": true,
+      "tags": [
+        "hacking-tools",
+        "news"
+      ]
     }
   ],
   "discovery_sources": [

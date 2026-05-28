@@ -1708,8 +1708,6 @@
   "discovery_sources": [
     "https://raw.githubusercontent.com/mrtouch93/awesome-security-feed/master/README.md",
     "https://raw.githubusercontent.com/thehappydinoa/awesome-threat-intel-rss/master/README.md",
-    "https://raw.githubusercontent.com/foorilla/allinfosecnews_sources/main/README.md",
-    "https://raw.githubusercontent.com/phretor/infosec-opml/master/infosec.opml",
     "https://raw.githubusercontent.com/CyberT17/secblogs/main/rssFeeds.json"
   ]
 }

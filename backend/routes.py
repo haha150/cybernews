@@ -3,6 +3,7 @@
 import json
 import os
 import re
+from urllib.parse import urlparse, urlunparse
 from xml.etree.ElementTree import Element, SubElement, tostring
 
 import httpx
@@ -242,14 +243,52 @@ async def discover_sources():
             except Exception as e:
                 logger.warning("discovery_source_error", url=url, error=str(e))
 
-    # Deduplicate by URL
+    # Deduplicate by normalized URL
+    existing = await db.get_all_sources()
+    existing_normalized = {_normalize_url(s["url"]) for s in existing}
+    existing_domains = {_extract_domain(s["url"]) for s in existing}
+
     seen = set()
     unique = []
-    existing = await db.get_all_sources()
-    existing_urls = {s["url"] for s in existing}
     for item in discovered:
-        if item["url"] not in seen and item["url"] not in existing_urls:
-            seen.add(item["url"])
-            unique.append(item)
+        norm = _normalize_url(item["url"])
+        domain = _extract_domain(item["url"])
+        # Skip if we've already seen this normalized URL,
+        # or if it matches an existing source by normalized URL,
+        # or if the domain is already covered by an existing source
+        if norm in seen or norm in existing_normalized or domain in existing_domains:
+            continue
+        seen.add(norm)
+        unique.append(item)
 
     return {"discovered": unique, "count": len(unique)}
+
+
+def _normalize_url(url: str) -> str:
+    """Normalize a URL for deduplication: lowercase scheme+host, strip trailing slashes, unify scheme."""
+    url = url.strip().rstrip("/")
+    # Normalize to https
+    if url.startswith("http://"):
+        url = "https://" + url[7:]
+    # Lowercase the scheme and host portion
+    try:
+        parsed = urlparse(url)
+        normalized = urlunparse((
+            parsed.scheme.lower(),
+            parsed.netloc.lower(),
+            parsed.path,
+            parsed.params,
+            parsed.query,
+            "",  # drop fragment
+        ))
+        return normalized.rstrip("/")
+    except Exception:
+        return url.lower()
+
+
+def _extract_domain(url: str) -> str:
+    """Extract the domain (netloc) from a URL for same-site deduplication."""
+    try:
+        return urlparse(url).netloc.lower().removeprefix("www.")
+    except Exception:
+        return url

@@ -135,7 +135,7 @@
     {
       "id": "securityaffairs",
       "name": "Security Affairs",
-      "url": "http://securityaffairs.co/wordpress/feed",
+      "url": "https://securityaffairs.co/wordpress/feed",
       "category": "news",
       "enabled": true,
       "tags": [
@@ -146,7 +146,7 @@
     {
       "id": "gbhackers",
       "name": "GBHackers",
-      "url": "http://feeds.feedburner.com/gbhackers",
+      "url": "https://feeds.feedburner.com/gbhackers",
       "category": "news",
       "enabled": true,
       "tags": [
@@ -663,7 +663,7 @@
     {
       "id": "kitploit",
       "name": "KitPloit (Pentest Tools)",
-      "url": "http://feeds.feedburner.com/PentestTools",
+      "url": "https://feeds.feedburner.com/PentestTools",
       "category": "redteam",
       "enabled": true,
       "tags": [
@@ -1410,17 +1410,6 @@
       ]
     },
     {
-      "id": "sentinelone_blog",
-      "name": "SentinelOne Blog",
-      "url": "https://www.sentinelone.com/blog/feed/",
-      "category": "threat-intel",
-      "enabled": true,
-      "tags": [
-        "edr",
-        "security"
-      ]
-    },
-    {
       "id": "sigma_hq",
       "name": "Sigma_HQ",
       "url": "https://medium.com/feed/sigma-hq",
@@ -1702,17 +1691,6 @@
       "tags": [
         "pentest",
         "ctf"
-      ]
-    },
-    {
-      "id": "nviso_labs",
-      "name": "NVISO Labs",
-      "url": "https://blog.nviso.eu/feed/",
-      "category": "research",
-      "enabled": true,
-      "tags": [
-        "malware-analysis",
-        "detection"
       ]
     },
     {

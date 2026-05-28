@@ -442,13 +442,23 @@ async function discoverSources() {
             return;
         }
 
-        results.innerHTML = data.discovered.slice(0, 50).map(item => `
+        results.innerHTML = data.discovered.slice(0, 50).map((item, idx) => `
             <div class="discover-item">
                 <span class="discover-item-url">${escapeHtml(item.name || item.url)}</span>
                 <span class="discover-item-url" style="font-size:0.65rem;color:var(--text-muted)">${escapeHtml(item.url)}</span>
-                <button class="btn-add-discover" onclick="addDiscoveredSource('${escapeHtml(item.url)}', '${escapeHtml(item.name || 'Discovered Feed')}')">+ Add</button>
+                <button class="btn-add-discover" data-discover-idx="${idx}">+ Add</button>
             </div>
         `).join('');
+
+        // Attach click handlers via event delegation (avoids inline JS / XSS)
+        const discoveredItems = data.discovered.slice(0, 50);
+        results.querySelectorAll('.btn-add-discover').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = parseInt(btn.dataset.discoverIdx, 10);
+                const item = discoveredItems[idx];
+                if (item) addDiscoveredSource(item.url, item.name || 'Discovered Feed');
+            });
+        });
     } catch {
         loading.classList.add('hidden');
         results.classList.remove('hidden');

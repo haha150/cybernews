@@ -10,6 +10,7 @@ import os
 import secrets
 import time
 from collections import defaultdict
+from contextlib import asynccontextmanager
 
 import structlog
 from dotenv import load_dotenv
@@ -39,7 +40,65 @@ structlog.configure(
 
 logger = structlog.get_logger()
 
-app = FastAPI(title="CyberNews Aggregator", version="1.0.0")
+RATE_STORE_CLEANUP_INTERVAL = 300  # seconds — purge stale entries every 5 min
+
+
+async def _periodic_store_cleanup():
+    """Periodically prune stale entries from in-memory rate/fail stores to prevent unbounded growth."""
+    while True:
+        await asyncio.sleep(RATE_STORE_CLEANUP_INTERVAL)
+        now = time.time()
+        # Prune rate limiter entries older than 60 s
+        stale_rate = [ip for ip, ts in _rate_store.items() if all(now - t > 60 for t in ts)]
+        for ip in stale_rate:
+            del _rate_store[ip]
+        # Prune fail2ban attempts older than the window
+        stale_fail = [ip for ip, ts in _fail_store.items() if all(now - t > FAIL2BAN_WINDOW for t in ts)]
+        for ip in stale_fail:
+            del _fail_store[ip]
+        # Prune expired bans
+        stale_bans = [ip for ip, t in _banned_ips.items() if now - t >= FAIL2BAN_BAN_TIME]
+        for ip in stale_bans:
+            del _banned_ips[ip]
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage startup and shutdown lifecycle."""
+    logger.info("app_starting")
+
+    # Init database
+    await db.init_db()
+
+    # Seed sources from feeds.json
+    feeds_path = os.getenv("FEEDS_PATH", "feeds.json")
+    try:
+        with open(feeds_path, "r") as f:
+            config = json.load(f)
+        await db.seed_sources(config.get("sources", []))
+    except FileNotFoundError:
+        logger.error("feeds_json_not_found", path=feeds_path)
+
+    # Startup seed: immediate full refresh so dashboard isn't empty
+    logger.info("startup_seed_starting")
+    asyncio.create_task(_startup_seed())
+
+    # Start periodic cleanup for in-memory stores
+    cleanup_task = asyncio.create_task(_periodic_store_cleanup())
+
+    # Start scheduler
+    start_scheduler()
+
+    yield
+
+    # Shutdown
+    cleanup_task.cancel()
+    stop_scheduler()
+    await db.close_pool()
+    logger.info("app_stopped")
+
+
+app = FastAPI(title="CyberNews Aggregator", version="1.0.0", lifespan=lifespan)
 
 # --- GZip ---
 app.add_middleware(GZipMiddleware, minimum_size=500)
@@ -163,30 +222,6 @@ async def rate_limit_middleware(request: Request, call_next):
 app.include_router(router, dependencies=[Depends(check_auth)])
 
 
-@app.on_event("startup")
-async def startup():
-    logger.info("app_starting")
-
-    # Init database
-    await db.init_db()
-
-    # Seed sources from feeds.json
-    feeds_path = os.getenv("FEEDS_PATH", "feeds.json")
-    try:
-        with open(feeds_path, "r") as f:
-            config = json.load(f)
-        await db.seed_sources(config.get("sources", []))
-    except FileNotFoundError:
-        logger.error("feeds_json_not_found", path=feeds_path)
-
-    # Startup seed: immediate full refresh so dashboard isn't empty
-    logger.info("startup_seed_starting")
-    asyncio.create_task(_startup_seed())
-
-    # Start scheduler
-    start_scheduler()
-
-
 async def _startup_seed():
     """Run initial fetch in background so the server starts responding immediately."""
     try:
@@ -195,10 +230,3 @@ async def _startup_seed():
         logger.info("startup_seed_complete", **results)
     except Exception as e:
         logger.error("startup_seed_error", error=str(e))
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    stop_scheduler()
-    await db.close_pool()
-    logger.info("app_stopped")

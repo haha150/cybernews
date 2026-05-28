@@ -1,6 +1,7 @@
 """API routes for the cybersecurity news aggregator."""
 
 import json
+import os
 import re
 from xml.etree.ElementTree import Element, SubElement, tostring
 
@@ -8,6 +9,7 @@ import httpx
 import structlog
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import Response
+from pydantic import BaseModel, Field, field_validator
 
 from backend import db
 from backend.fetcher import fetch_all_sources, discover_feed_url, USER_AGENT
@@ -15,6 +17,35 @@ from backend.enricher import enrich_cve
 
 logger = structlog.get_logger()
 router = APIRouter(prefix="/api")
+
+
+class SourceCreate(BaseModel):
+    """Validated request body for creating a new source."""
+    url: str = Field(..., min_length=1, max_length=2048)
+    name: str = Field(..., min_length=1, max_length=255)
+    category: str = Field(default="news", max_length=50)
+
+    @field_validator("url")
+    @classmethod
+    def validate_url(cls, v: str) -> str:
+        v = v.strip()
+        if not v.startswith(("http://", "https://")):
+            raise ValueError("URL must start with http:// or https://")
+        return v
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v: str) -> str:
+        return v.strip()
+
+    @field_validator("category")
+    @classmethod
+    def validate_category(cls, v: str) -> str:
+        v = v.strip()
+        allowed = {"news", "cve", "redteam", "threat-intel", "government", "research"}
+        if v not in allowed:
+            raise ValueError(f"Category must be one of: {', '.join(sorted(allowed))}")
+        return v
 
 
 @router.get("/articles")
@@ -62,15 +93,10 @@ async def list_sources():
 
 
 @router.post("/sources")
-async def add_source(body: dict):
-    url = body.get("url", "").strip()
-    name = body.get("name", "").strip()
-    category = body.get("category", "news").strip()
-
-    if not url:
-        raise HTTPException(400, "URL is required")
-    if not name:
-        raise HTTPException(400, "Name is required")
+async def add_source(body: SourceCreate):
+    url = body.url
+    name = body.name
+    category = body.category
 
     # Try to discover feed URL if it's a website
     feed_url = await discover_feed_url(url)
@@ -141,7 +167,8 @@ async def export_opml():
             xmlUrl=src["url"],
         )
 
-    xml_bytes = tostring(opml, encoding="unicode", xml_declaration=True)
+    xml_str = tostring(opml, encoding="unicode")
+    xml_bytes = '<?xml version="1.0" encoding="UTF-8"?>\n' + xml_str
     return Response(
         content=xml_bytes,
         media_type="application/xml",
@@ -152,7 +179,8 @@ async def export_opml():
 @router.get("/discover")
 async def discover_sources():
     """Fetch curated GitHub lists and return discovered feed URLs."""
-    with open("feeds.json", "r") as f:
+    feeds_path = os.getenv("FEEDS_PATH", "feeds.json")
+    with open(feeds_path, "r") as f:
         config = json.load(f)
 
     discovery_urls = config.get("discovery_sources", [])

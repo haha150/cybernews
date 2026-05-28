@@ -6,7 +6,7 @@ import structlog
 
 from backend.fetcher import fetch_all_sources
 from backend.enricher import enrich_pending_articles, refresh_kev_catalog
-from backend.db import cleanup_old_articles
+from backend.db import cleanup_old_articles, retry_disabled_sources
 
 logger = structlog.get_logger()
 
@@ -39,6 +39,13 @@ async def scheduled_cleanup():
         logger.error("scheduled_cleanup_error", error=str(e))
 
 
+async def scheduled_retry_disabled():
+    try:
+        await retry_disabled_sources()
+    except Exception as e:
+        logger.error("scheduled_retry_error", error=str(e))
+
+
 def start_scheduler():
     scheduler.add_job(
         scheduled_fetch,
@@ -66,6 +73,13 @@ def start_scheduler():
         "interval",
         hours=24,
         id="article_cleanup",
+        replace_existing=True,
+    )
+    scheduler.add_job(
+        scheduled_retry_disabled,
+        "interval",
+        hours=6,
+        id="retry_disabled_sources",
         replace_existing=True,
     )
     scheduler.start()

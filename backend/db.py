@@ -23,7 +23,9 @@ CREATE TABLE IF NOT EXISTS sources (
     last_status_code INTEGER,
     last_error TEXT,
     article_count INTEGER DEFAULT 0,
-    is_custom INTEGER DEFAULT 0
+    is_custom INTEGER DEFAULT 0,
+    consecutive_failures INTEGER DEFAULT 0,
+    disabled_at TEXT
 );
 
 CREATE TABLE IF NOT EXISTS articles (
@@ -106,6 +108,16 @@ async def init_db():
     try:
         await conn.executescript(SCHEMA)
         await conn.commit()
+        # Migrate: add columns if missing (existing installs)
+        for col, defn in [
+            ("consecutive_failures", "INTEGER DEFAULT 0"),
+            ("disabled_at", "TEXT"),
+        ]:
+            try:
+                await conn.execute(f"ALTER TABLE sources ADD COLUMN {col} {defn}")
+                await conn.commit()
+            except Exception:
+                pass  # Column already exists
         logger.info("database_initialized", path=DB_PATH)
     finally:
         await release_db(conn)
@@ -148,12 +160,39 @@ async def get_all_sources() -> list[dict]:
 async def update_source_health(source_id: str, status_code: int | None, error: str | None):
     conn = await get_db()
     try:
-        await conn.execute(
-            """UPDATE sources SET last_fetched_at = datetime('now'),
-               last_status_code = ?, last_error = ? WHERE id = ?""",
-            (status_code, error, source_id),
-        )
-        await conn.commit()
+        if error or (status_code and status_code >= 400):
+            # Increment failure counter
+            await conn.execute(
+                """UPDATE sources SET last_fetched_at = datetime('now'),
+                   last_status_code = ?, last_error = ?,
+                   consecutive_failures = consecutive_failures + 1
+                   WHERE id = ?""",
+                (status_code, error, source_id),
+            )
+            await conn.commit()
+            # Auto-disable after 10 consecutive failures
+            await conn.execute(
+                """UPDATE sources SET enabled = 0, disabled_at = datetime('now')
+                   WHERE id = ? AND consecutive_failures >= 10 AND enabled = 1""",
+                (source_id,),
+            )
+            await conn.commit()
+            cursor = await conn.execute(
+                "SELECT consecutive_failures, enabled FROM sources WHERE id = ?", (source_id,))
+            row = await cursor.fetchone()
+            if row and row["enabled"] == 0 and row["consecutive_failures"] >= 10:
+                logger.warning("source_auto_disabled", source=source_id,
+                               failures=row["consecutive_failures"])
+        else:
+            # Success — reset failure counter
+            await conn.execute(
+                """UPDATE sources SET last_fetched_at = datetime('now'),
+                   last_status_code = ?, last_error = NULL,
+                   consecutive_failures = 0
+                   WHERE id = ?""",
+                (status_code, source_id),
+            )
+            await conn.commit()
     finally:
         await release_db(conn)
 
@@ -378,5 +417,23 @@ async def cleanup_old_articles():
             await conn.commit()
             logger.info("cleanup_old_articles", deleted=deleted, retention_days=RETENTION_DAYS)
         await conn.execute("PRAGMA incremental_vacuum")
+    finally:
+        await release_db(conn)
+
+
+async def retry_disabled_sources():
+    """Re-enable sources that were auto-disabled more than 24h ago for a retry."""
+    conn = await get_db()
+    try:
+        cursor = await conn.execute(
+            """UPDATE sources SET enabled = 1, consecutive_failures = 0, disabled_at = NULL
+               WHERE enabled = 0 AND disabled_at IS NOT NULL
+               AND disabled_at < datetime('now', '-1 day')
+               RETURNING id, name""")
+        rows = await cursor.fetchall()
+        if rows:
+            await conn.commit()
+            for r in rows:
+                logger.info("source_auto_reenabled", source=r["id"], name=r["name"])
     finally:
         await release_db(conn)

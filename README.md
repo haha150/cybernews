@@ -2,7 +2,7 @@
 
 A self-hosted cybersecurity news aggregator dashboard that pulls the latest
 CVEs, vulnerabilities, exploits, threat intelligence, and security research
-from 80+ RSS/Atom feeds in near real-time.
+from 150+ RSS/Atom feeds in near real-time.
 
 ## Quick Start
 
@@ -15,7 +15,7 @@ Open **http://localhost:8080** in your browser.
 
 ## Features
 
-- **80+ curated security feeds** — news, CVEs, red team, threat intel, government advisories
+- **150+ curated security feeds** — news, CVEs, red team, threat intel, government advisories
 - **PoC/Exploit enrichment** — automatic lookup via PoC-in-GitHub, CISA KEV, Exploit-DB
 - **CVSS severity badges** — sourced from NVD API when available
 - **Full-text search** across all cached articles
@@ -30,6 +30,7 @@ Open **http://localhost:8080** in your browser.
 - **Fully containerized** — single `docker compose up` command
 - **TLS ready** — drop your cert/key into `certs/` for automatic HTTPS
 - **Optional auth** — HTTP Basic Auth via env vars
+- **Fail2ban** — auto-bans IPs after repeated failed login attempts
 - **Rate limiting** on mutating API endpoints
 - **GZip compression** for API responses
 
@@ -76,6 +77,9 @@ Open **http://localhost:8080** in your browser.
 | `AUTH_USERNAME` | *(empty)* | HTTP Basic Auth username (leave empty to disable) |
 | `AUTH_PASSWORD` | *(empty)* | HTTP Basic Auth password |
 | `RATE_LIMIT_RPM` | `30` | Max requests/min on mutating endpoints |
+| `FAIL2BAN_MAX_ATTEMPTS` | `5` | Failed logins before IP is banned |
+| `FAIL2BAN_WINDOW` | `300` | Time window (seconds) for counting failed attempts |
+| `FAIL2BAN_BAN_TIME` | `900` | Ban duration (seconds) after max attempts exceeded |
 
 ## TLS / HTTPS
 
@@ -99,6 +103,13 @@ When certs are present, nginx automatically enables HTTPS on port 8443 (configur
 2. Fill in the form and confirm via email
 3. Set `NVD_API_KEY` in your `.env` file
 4. This increases NVD rate limits from 5 to 50 requests per 30 seconds
+
+## Fail2ban (Brute-Force Protection)
+
+When HTTP Basic Auth is enabled, the backend tracks failed login attempts per IP.
+After 5 failures within 5 minutes (configurable), the IP is banned for 15 minutes.
+Bans are stored in-memory and automatically expire. The `/api/stats` healthcheck
+endpoint is exempt from bans so container health checks continue to work.
 
 ## Adding Feeds
 

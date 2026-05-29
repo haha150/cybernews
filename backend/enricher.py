@@ -1,6 +1,8 @@
 """PoC / CVE enrichment — queries external sources for exploit data."""
 
 import asyncio
+import csv
+import io
 import os
 import re
 from datetime import datetime, timezone, timedelta
@@ -21,6 +23,10 @@ CVE_PATTERN = re.compile(r"CVE-\d{4}-\d{4,}")
 # In-memory KEV cache
 _kev_cache: dict[str, dict] = {}
 _kev_last_fetched: datetime | None = None
+
+# In-memory Exploit-DB CSV cache: maps CVE ID → list of EDB IDs
+_exploitdb_cache: dict[str, list[str]] = {}
+_exploitdb_last_fetched: datetime | None = None
 
 
 async def refresh_kev_catalog():
@@ -55,6 +61,47 @@ async def refresh_kev_catalog():
         logger.error("kev_catalog_fetch_error", error=str(e))
 
 
+async def refresh_exploitdb_cache():
+    """Fetch Exploit-DB CSV from GitLab mirror and build CVE→EDB-ID index (refresh every 24h)."""
+    global _exploitdb_cache, _exploitdb_last_fetched
+
+    if _exploitdb_last_fetched and (datetime.now(timezone.utc) - _exploitdb_last_fetched) < timedelta(hours=24):
+        return
+
+    csv_url = (
+        "https://gitlab.com/exploit-database/exploitdb/-/raw/main/files_exploits.csv"
+    )
+
+    try:
+        async with httpx.AsyncClient(
+            timeout=60.0, headers={"User-Agent": USER_AGENT}, follow_redirects=True, verify=False
+        ) as client:
+            resp = await client.get(csv_url)
+            if resp.status_code == 200:
+                new_cache: dict[str, list[str]] = {}
+                reader = csv.DictReader(io.StringIO(resp.text))
+                for row in reader:
+                    edb_id = row.get("id", "").strip()
+                    codes = row.get("codes", "")
+                    if not edb_id or not codes:
+                        continue
+                    for code in codes.split(";"):
+                        code = code.strip()
+                        if code.startswith("CVE-"):
+                            if code not in new_cache:
+                                new_cache[code] = []
+                            new_cache[code].append(edb_id)
+
+                _exploitdb_cache.clear()
+                _exploitdb_cache.update(new_cache)
+                _exploitdb_last_fetched = datetime.now(timezone.utc)
+                logger.info("exploitdb_cache_refreshed", cve_count=len(_exploitdb_cache))
+            else:
+                logger.warning("exploitdb_csv_fetch_non_200", status=resp.status_code)
+    except Exception as e:
+        logger.error("exploitdb_cache_fetch_error", error=str(e))
+
+
 async def query_github_pocs(cve_id: str) -> list[dict]:
     """Query nomi-sec PoC-in-GitHub API."""
     try:
@@ -77,6 +124,47 @@ async def query_github_pocs(cve_id: str) -> list[dict]:
                 return pocs
     except Exception as e:
         logger.warning("github_poc_query_error", cve_id=cve_id, error=str(e))
+    return []
+
+
+def query_exploitdb(cve_id: str) -> list[str]:
+    """Lookup Exploit-DB IDs for a CVE from the in-memory CSV cache.
+
+    Returns a list of EDB IDs (e.g. ["12345", "67890"]).
+    The cache must be populated via refresh_exploitdb_cache() first.
+    """
+    return _exploitdb_cache.get(cve_id, [])
+
+
+async def query_sploitus(cve_id: str) -> list[str]:
+    """Query Sploitus search API for exploit URLs matching a CVE ID.
+
+    Returns a list of exploit URLs.
+    """
+    try:
+        async with httpx.AsyncClient(
+            timeout=15.0, headers={"User-Agent": USER_AGENT}, verify=False
+        ) as client:
+            resp = await client.post(
+                "https://sploitus.com/search",
+                json={
+                    "type": "exploits",
+                    "query": cve_id,
+                    "title": False,
+                    "sort": "default",
+                    "offset": 0,
+                },
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                urls = []
+                for item in data.get("exploits", []):
+                    href = item.get("href", "")
+                    if href:
+                        urls.append(href)
+                return urls[:10]  # Limit to 10 most relevant
+    except Exception as e:
+        logger.warning("sploitus_query_error", cve_id=cve_id, error=str(e))
     return []
 
 
@@ -141,13 +229,19 @@ async def enrich_cve(cve_id: str, force: bool = False) -> dict:
                 return existing
 
     await refresh_kev_catalog()
+    await refresh_exploitdb_cache()
 
     # Query sources concurrently
     github_task = asyncio.create_task(query_github_pocs(cve_id))
     nvd_task = asyncio.create_task(query_nvd_cvss(cve_id))
+    sploitus_task = asyncio.create_task(query_sploitus(cve_id))
 
     github_pocs = await github_task
     nvd_data = await nvd_task
+    sploitus_urls = await sploitus_task
+
+    # Exploit-DB is a synchronous cache lookup (no await needed)
+    exploit_db_ids = query_exploitdb(cve_id)
 
     kev_info = _kev_cache.get(cve_id, {})
 
@@ -159,12 +253,19 @@ async def enrich_cve(cve_id: str, force: bool = False) -> dict:
         "kev_ransomware": kev_info.get("ransomware", False),
         "cvss_score": nvd_data.get("score") if nvd_data else None,
         "cvss_vector": nvd_data.get("vector") if nvd_data else None,
-        "exploit_db_ids": [],
-        "sploitus_urls": [],
+        "exploit_db_ids": exploit_db_ids,
+        "sploitus_urls": sploitus_urls,
     }
 
     await db.upsert_cve_enrichment(enrichment)
-    logger.info("cve_enriched", cve_id=cve_id, pocs=len(github_pocs), is_kev=enrichment["is_kev"])
+    logger.info(
+        "cve_enriched",
+        cve_id=cve_id,
+        pocs=len(github_pocs),
+        is_kev=enrichment["is_kev"],
+        exploitdb=len(exploit_db_ids),
+        sploitus=len(sploitus_urls),
+    )
 
     return enrichment
 
@@ -183,7 +284,8 @@ async def enrich_article(article: dict):
     for cve_id in cve_ids:
         try:
             result = await enrich_cve(cve_id)
-            if result.get("github_pocs") or result.get("is_kev"):
+            if (result.get("github_pocs") or result.get("is_kev")
+                    or result.get("exploit_db_ids") or result.get("sploitus_urls")):
                 has_poc = True
         except Exception as e:
             logger.warning("article_enrich_error", cve_id=cve_id, error=str(e))

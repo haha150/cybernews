@@ -5,7 +5,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import structlog
 
 from backend.fetcher import fetch_all_sources
-from backend.enricher import enrich_pending_articles, refresh_kev_catalog
+from backend.enricher import enrich_pending_articles, refresh_kev_catalog, refresh_exploitdb_cache
 from backend.db import cleanup_old_articles, retry_disabled_sources
 
 logger = structlog.get_logger()
@@ -66,6 +66,13 @@ def start_scheduler():
         "interval",
         hours=1,
         id="kev_refresh",
+        replace_existing=True,
+    )
+    scheduler.add_job(
+        refresh_exploitdb_cache,
+        "interval",
+        hours=24,
+        id="exploitdb_refresh",
         replace_existing=True,
     )
     scheduler.add_job(

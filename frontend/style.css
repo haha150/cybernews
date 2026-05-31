@@ -429,7 +429,7 @@ body {
 .article-grid {
     padding: 24px;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 16px;
     flex: 1;
 }
@@ -445,6 +445,10 @@ body {
     gap: 10px;
     transition: all 0.15s;
     cursor: default;
+    min-width: 0;
+    overflow: hidden;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 .article-card:hover {
     border-color: var(--border);
@@ -911,7 +915,7 @@ body {
 /* === Responsive === */
 @media (max-width: 1200px) {
     .article-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 

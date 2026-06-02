@@ -109,7 +109,7 @@ body {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 1px;
-    color: var(--text-muted);
+    color: #ffffff;
     margin-bottom: 10px;
     display: flex;
     align-items: center;
@@ -130,7 +130,7 @@ body {
     background: transparent;
     border: none;
     border-radius: var(--radius-sm);
-    color: var(--text-secondary);
+    color: #ffffff;
     font-family: var(--font-sans);
     font-size: 0.9rem;
     cursor: pointer;
@@ -155,7 +155,7 @@ body {
     margin-left: auto;
     font-family: var(--font-mono);
     font-size: 0.75rem;
-    color: var(--text-muted);
+    color: #ffffff;
     background: var(--bg-primary);
     padding: 2px 6px;
     border-radius: 10px;
@@ -169,7 +169,7 @@ body {
     align-items: center;
     gap: 10px;
     font-size: 0.85rem;
-    color: var(--text-secondary);
+    color: #ffffff;
     cursor: pointer;
     user-select: none;
 }
@@ -218,7 +218,7 @@ body {
     gap: 8px;
     padding: 4px 8px;
     font-size: 0.8rem;
-    color: var(--text-secondary);
+    color: #ffffff;
     border-radius: var(--radius-sm);
 }
 .source-item:hover {
@@ -242,7 +242,7 @@ body {
 .source-count-badge {
     font-family: var(--font-mono);
     font-size: 0.7rem;
-    color: var(--text-muted);
+    color: #ffffff;
 }
 
 /* Sidebar footer */
@@ -260,7 +260,7 @@ body {
     background: var(--bg-hover);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    color: var(--text-secondary);
+    color: #ffffff;
     font-size: 0.85rem;
     cursor: pointer;
     transition: all 0.15s;

@@ -384,7 +384,7 @@ body {
 .stat-chip {
     font-family: var(--font-mono);
     font-size: 0.75rem;
-    color: var(--text-muted);
+    color: #ffffff;
     padding: 4px 8px;
     background: var(--bg-primary);
     border-radius: var(--radius-sm);
@@ -396,7 +396,7 @@ body {
 }
 .last-updated {
     font-size: 0.75rem;
-    color: var(--text-muted);
+    color: #ffffff;
 }
 .btn-refresh {
     width: 32px;

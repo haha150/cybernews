@@ -5,6 +5,7 @@ let currentCategory = 'all';
 let currentPage = 1;
 let currentSearch = '';
 let pocOnly = false;
+let selectedSources = new Set();
 let lastArticleCount = 0;
 let searchDebounceTimer = null;
 
@@ -251,6 +252,7 @@ async function fetchArticles() {
         if (currentCategory !== 'all') params.set('category', currentCategory);
         if (currentSearch) params.set('search', currentSearch);
         if (pocOnly) params.set('poc_only', 'true');
+        if (selectedSources.size > 0) params.set('sources', [...selectedSources].join(','));
         params.set('page', currentPage);
         params.set('limit', 50);
 
@@ -302,13 +304,51 @@ function renderSourceList(sources) {
         else if (s.last_status_code && s.last_status_code !== 200) dotClass = 'warning';
         else if (!s.last_fetched_at) dotClass = 'warning';
 
+        const isActive = selectedSources.has(s.id);
+        const filteringActive = selectedSources.size > 0;
+        let itemClass = 'source-item';
+        if (filteringActive) itemClass += isActive ? ' source-selected' : ' source-dimmed';
+
         return `
-            <div class="source-item" title="${escapeHtml(s.url)}">
+            <div class="${itemClass}" data-source-id="${escapeHtml(s.id)}" title="${escapeHtml(s.url)}" role="button" tabindex="0">
                 <span class="source-dot ${dotClass}"></span>
                 <span class="source-name">${escapeHtml(s.name)}</span>
                 <span class="source-count-badge">${s.article_count || 0}</span>
             </div>`;
     }).join('');
+
+    list.querySelectorAll('.source-item').forEach(item => {
+        const toggle = () => {
+            const id = item.dataset.sourceId;
+            if (selectedSources.has(id)) {
+                selectedSources.delete(id);
+            } else {
+                selectedSources.add(id);
+            }
+            updateSourceFilterUI(sources);
+            currentPage = 1;
+            fetchArticles();
+        };
+        item.addEventListener('click', toggle);
+        item.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+    });
+
+    updateSourceFilterUI(sources);
+}
+
+function updateSourceFilterUI(sources) {
+    const clearBtn = document.getElementById('source-filter-clear');
+    if (clearBtn) clearBtn.classList.toggle('hidden', selectedSources.size === 0);
+
+    const list = document.getElementById('source-list');
+    const filteringActive = selectedSources.size > 0;
+    list.querySelectorAll('.source-item').forEach(item => {
+        const id = item.dataset.sourceId;
+        item.classList.remove('source-selected', 'source-dimmed');
+        if (filteringActive) {
+            item.classList.add(selectedSources.has(id) ? 'source-selected' : 'source-dimmed');
+        }
+    });
 }
 
 function updateCategoryCounts(sources) {
@@ -524,6 +564,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('next-page').addEventListener('click', () => {
         currentPage++;
         fetchArticles();
+    });
+
+    // Source filter clear
+    document.getElementById('source-filter-clear').addEventListener('click', () => {
+        selectedSources.clear();
+        currentPage = 1;
+        fetchArticles();
+        fetchSources();
     });
 
     // Source management modal

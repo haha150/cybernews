@@ -220,9 +220,22 @@ body {
     font-size: 0.8rem;
     color: #ffffff;
     border-radius: var(--radius-sm);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s, opacity 0.15s;
 }
 .source-item:hover {
     background: var(--bg-hover);
+}
+.source-item.source-selected {
+    background: rgba(99, 179, 237, 0.15);
+    outline: 1px solid rgba(99, 179, 237, 0.5);
+}
+.source-item.source-dimmed {
+    opacity: 0.35;
+}
+.source-item.source-dimmed:hover {
+    opacity: 0.7;
 }
 .source-dot {
     width: 6px;
@@ -243,6 +256,19 @@ body {
     font-family: var(--font-mono);
     font-size: 0.7rem;
     color: #ffffff;
+}
+.source-filter-clear {
+    font-size: 0.7rem;
+    padding: 1px 6px;
+    background: rgba(99, 179, 237, 0.2);
+    border: 1px solid rgba(99, 179, 237, 0.5);
+    border-radius: var(--radius-sm);
+    color: #63b3ed;
+    cursor: pointer;
+    margin-left: 4px;
+}
+.source-filter-clear:hover {
+    background: rgba(99, 179, 237, 0.35);
 }
 
 /* Sidebar footer */

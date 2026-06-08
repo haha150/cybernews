@@ -54,11 +54,13 @@ async def list_articles(
     category: str | None = Query(None),
     search: str | None = Query(None),
     poc_only: bool = Query(False),
+    sources: str | None = Query(None),
     page: int = Query(1, ge=1),
     limit: int = Query(50, ge=1, le=200),
 ):
+    source_ids = [s.strip() for s in sources.split(",") if s.strip()] if sources else None
     articles, total = await db.get_articles(
-        category=category, search=search, poc_only=poc_only, page=page, limit=limit
+        category=category, search=search, poc_only=poc_only, sources=source_ids, page=page, limit=limit
     )
 
     # Attach enrichment data to articles with CVE IDs

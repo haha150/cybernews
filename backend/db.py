@@ -236,7 +236,7 @@ async def insert_article(article: dict) -> bool:
         await release_db(conn)
 
 
-async def get_articles(category=None, search=None, poc_only=False, page=1, limit=50):
+async def get_articles(category=None, search=None, poc_only=False, sources=None, page=1, limit=50):
     conn = await get_db()
     try:
         conditions, params = [], []
@@ -251,6 +251,10 @@ async def get_articles(category=None, search=None, poc_only=False, page=1, limit
             params.extend([term, term])
         if poc_only:
             conditions.append("a.is_poc_enriched = 1")
+        if sources:
+            placeholders = ",".join("?" * len(sources))
+            conditions.append(f"a.source_id IN ({placeholders})")
+            params.extend(sources)
 
         where = " AND ".join(conditions) if conditions else "1=1"
         cursor = await conn.execute(f"SELECT COUNT(*) FROM articles a WHERE {where}", params)

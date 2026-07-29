@@ -38,7 +38,7 @@ async def refresh_kev_catalog():
 
     try:
         async with httpx.AsyncClient(
-            timeout=30.0, headers={"User-Agent": USER_AGENT}, verify=False
+            timeout=30.0, headers={"User-Agent": USER_AGENT},
         ) as client:
             resp = await client.get(
                 "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
@@ -74,7 +74,7 @@ async def refresh_exploitdb_cache():
 
     try:
         async with httpx.AsyncClient(
-            timeout=60.0, headers={"User-Agent": USER_AGENT}, follow_redirects=True, verify=False
+            timeout=60.0, headers={"User-Agent": USER_AGENT}, follow_redirects=True,
         ) as client:
             resp = await client.get(csv_url)
             if resp.status_code == 200:
@@ -106,7 +106,7 @@ async def query_github_pocs(cve_id: str) -> list[dict]:
     """Query nomi-sec PoC-in-GitHub API."""
     try:
         async with httpx.AsyncClient(
-            timeout=15.0, headers={"User-Agent": USER_AGENT}, verify=False
+            timeout=15.0, headers={"User-Agent": USER_AGENT},
         ) as client:
             resp = await client.get(
                 f"https://poc-in-github.motikan2010.net/api/v1/?cve_id={cve_id}"
@@ -143,7 +143,7 @@ async def query_sploitus(cve_id: str) -> list[str]:
     """
     try:
         async with httpx.AsyncClient(
-            timeout=15.0, headers={"User-Agent": USER_AGENT}, verify=False
+            timeout=15.0, headers={"User-Agent": USER_AGENT},
         ) as client:
             resp = await client.post(
                 "https://sploitus.com/search",
@@ -175,7 +175,7 @@ async def query_nvd_cvss(cve_id: str) -> dict | None:
         headers["apiKey"] = NVD_API_KEY
 
     try:
-        async with httpx.AsyncClient(timeout=15.0, headers=headers, verify=False) as client:
+        async with httpx.AsyncClient(timeout=15.0, headers=headers) as client:
             resp = await client.get(
                 f"https://services.nvd.nist.gov/rest/json/cves/2.0?cveId={cve_id}"
             )

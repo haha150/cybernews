@@ -437,6 +437,16 @@ body {
     font-weight: 600;
 }
 
+.density-toggle {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+.density-toggle.active {
+    background: var(--bg-hover);
+    color: var(--accent);
+    font-weight: 600;
+}
+
 .stats-bar {
     display: flex;
     gap: 8px;
@@ -493,6 +503,11 @@ body {
     gap: 16px;
     flex: 1;
     min-width: 0;
+    /* Fade briefly when switching view/filters instead of an abrupt swap */
+    transition: opacity 0.12s ease;
+}
+.article-grid.view-fade {
+    opacity: 0;
 }
 
 /* List view layout */
@@ -500,6 +515,17 @@ body {
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+/* Compact density (list view only) */
+.article-grid.list-view.compact {
+    gap: 4px;
+}
+.article-grid.list-view.compact .article-row {
+    padding: 5px 12px;
+}
+.article-grid.list-view.compact .row-title {
+    font-size: 0.82rem;
 }
 
 /* Article Row (list view) */
@@ -511,8 +537,12 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
-    transition: all 0.15s;
+    transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
     min-width: 0;
+    /* Let the browser skip rendering work for off-screen rows — a
+       lightweight, native alternative to manual list virtualization. */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 42px;
 }
 .article-row:hover {
     border-color: var(--border);
@@ -615,6 +645,10 @@ body {
     overflow: hidden;
     overflow-wrap: break-word;
     word-break: break-word;
+    /* Let the browser skip rendering work for off-screen cards — a
+       lightweight, native alternative to manual list virtualization. */
+    content-visibility: auto;
+    contain-intrinsic-size: auto 260px;
 }
 .article-card:hover {
     border-color: var(--border);

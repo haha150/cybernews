@@ -94,9 +94,10 @@
             </div>
             <div class="header-actions">
                 <div class="view-toggle" id="view-toggle" role="group" aria-label="Article view">
-                    <button id="view-card-btn" class="view-toggle-btn active" data-view="card" title="Card view">🔲 Cards</button>
-                    <button id="view-list-btn" class="view-toggle-btn" data-view="list" title="List view">📋 List</button>
+                    <button id="view-card-btn" class="view-toggle-btn active" data-view="card" title="Card view (press v to toggle)" aria-pressed="true">🔲 Cards</button>
+                    <button id="view-list-btn" class="view-toggle-btn" data-view="list" title="List view (press v to toggle)" aria-pressed="false">📋 List</button>
                 </div>
+                <button id="density-toggle" class="view-toggle-btn density-toggle hidden" title="Toggle compact row density" aria-pressed="false">↕️ Compact</button>
                 <div class="stats-bar">
                     <span id="stats-articles" class="stat-chip">0 articles</span>
                     <span id="stats-sources" class="stat-chip">0 sources</span>

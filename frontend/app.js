@@ -68,7 +68,9 @@ async function apiFetch(path, options = {}) {
 function faviconUrl(articleUrl) {
     try {
         const u = new URL(articleUrl);
-        return `https://www.google.com/s2/favicons?domain=${u.hostname}&sz=32`;
+        // Routed through our own backend so the browser never contacts a
+        // third-party favicon service directly (privacy + resilience).
+        return `${API_BASE}/favicon?domain=${encodeURIComponent(u.hostname)}`;
     } catch {
         return '';
     }
@@ -220,6 +222,7 @@ function renderArticleRow(article) {
     const sourceName = article.source_name || article.source_id || '';
     const cveIds = article.cve_ids || [];
     const severity = article.severity;
+    const description = article.description || '';
 
     let severityHtml = '';
     if (severity) {
@@ -232,7 +235,7 @@ function renderArticleRow(article) {
     }
 
     return `
-        <div class="article-row">
+        <div class="article-row" title="${escapeHtml(description)}">
             <img class="row-favicon" src="${escapeHtml(favicon)}" alt="" onerror="this.style.display='none'" loading="lazy">
             <span class="card-category row-category ${categoryClass(article.category)}">${categoryLabel(article.category)}</span>
             <div class="row-title">
@@ -247,6 +250,11 @@ function renderArticleRow(article) {
         </div>`;
 }
 
+// Tracks the last rendered content signature so identical re-fetches
+// (e.g. a manual refresh that found no new articles) don't force a
+// needless full DOM rebuild — this reduces visual flicker/image reloads.
+let lastRenderedKey = null;
+
 function renderArticles(articles) {
     const grid = document.getElementById('article-grid');
     const emptyState = document.getElementById('empty-state');
@@ -254,6 +262,7 @@ function renderArticles(articles) {
     grid.classList.toggle('list-view', currentView === 'list');
 
     if (articles.length === 0) {
+        lastRenderedKey = null;
         grid.innerHTML = '';
         emptyState.classList.remove('hidden');
         const emptyMsg = document.getElementById('empty-message');
@@ -268,6 +277,15 @@ function renderArticles(articles) {
     }
 
     emptyState.classList.add('hidden');
+
+    const key = `${currentView}|${articles.map(a =>
+        `${a.id ?? a.url}:${a.severity || ''}:${(a.cve_ids || []).length}:${Object.keys(a.enrichments || {}).length}`
+    ).join(',')}`;
+    if (key === lastRenderedKey) {
+        return; // Content identical to what's already shown — skip re-render.
+    }
+    lastRenderedKey = key;
+
     const renderFn = currentView === 'list' ? renderArticleRow : renderArticleCard;
     grid.innerHTML = articles.map(renderFn).join('');
 }
@@ -291,8 +309,11 @@ function renderPagination(total, page, limit, pages) {
 
 // --- Data Fetching ---
 
-async function fetchArticles() {
-    renderSkeletons();
+async function fetchArticles({ showSkeleton = true } = {}) {
+    // Skip the skeleton wipe for background refreshes — the previous
+    // content stays visible, and renderArticles() will no-op if the
+    // fetched data is identical, avoiding needless flicker.
+    if (showSkeleton) renderSkeletons();
 
     try {
         const params = new URLSearchParams();
@@ -465,7 +486,7 @@ async function doRefresh() {
     try {
         const result = await apiFetch('/refresh', { method: 'POST' });
         showToast(`Refreshed: ${result.new_articles} new articles from ${result.sources_fetched} sources`, 'success');
-        await fetchArticles();
+        await fetchArticles({ showSkeleton: false });
         await fetchStats();
         await fetchSources();
     } catch (err) {
@@ -570,16 +591,61 @@ async function addDiscoveredSource(url, name) {
 
 document.addEventListener('DOMContentLoaded', () => {
     // View toggle (card / list)
-    const viewButtons = document.querySelectorAll('.view-toggle-btn');
-    viewButtons.forEach(btn => {
-        if (btn.dataset.view === currentView) btn.classList.add('active');
-        else btn.classList.remove('active');
-        btn.addEventListener('click', () => {
-            currentView = btn.dataset.view;
-            localStorage.setItem('cybernews-view', currentView);
-            viewButtons.forEach(b => b.classList.toggle('active', b.dataset.view === currentView));
-            fetchArticles();
+    const viewButtons = document.querySelectorAll('#view-toggle .view-toggle-btn');
+    const densityBtn = document.getElementById('density-toggle');
+    const grid = document.getElementById('article-grid');
+    let currentDensity = localStorage.getItem('cybernews-density') || 'comfortable';
+
+    function updateViewButtonsUI() {
+        viewButtons.forEach(b => {
+            const isActive = b.dataset.view === currentView;
+            b.classList.toggle('active', isActive);
+            b.setAttribute('aria-pressed', String(isActive));
         });
+        densityBtn.classList.toggle('hidden', currentView !== 'list');
+    }
+
+    function updateDensityUI() {
+        const isCompact = currentDensity === 'compact';
+        grid.classList.toggle('compact', isCompact);
+        densityBtn.classList.toggle('active', isCompact);
+        densityBtn.setAttribute('aria-pressed', String(isCompact));
+    }
+
+    async function switchView(view) {
+        if (view === currentView) return;
+        currentView = view;
+        localStorage.setItem('cybernews-view', currentView);
+        updateViewButtonsUI();
+
+        const scrollY = window.scrollY;
+        grid.classList.add('view-fade');
+        await new Promise(r => setTimeout(r, 120));
+        await fetchArticles();
+        grid.classList.remove('view-fade');
+        window.scrollTo(0, scrollY);
+    }
+
+    viewButtons.forEach(btn => {
+        btn.addEventListener('click', () => switchView(btn.dataset.view));
+    });
+
+    densityBtn.addEventListener('click', () => {
+        currentDensity = currentDensity === 'compact' ? 'comfortable' : 'compact';
+        localStorage.setItem('cybernews-density', currentDensity);
+        updateDensityUI();
+    });
+
+    updateViewButtonsUI();
+    updateDensityUI();
+
+    // Keyboard shortcut: press "v" to toggle card/list view (ignored while typing)
+    document.addEventListener('keydown', (e) => {
+        const tag = (e.target.tagName || '').toLowerCase();
+        if (tag === 'input' || tag === 'textarea' || e.target.isContentEditable) return;
+        if (e.key === 'v' || e.key === 'V') {
+            switchView(currentView === 'card' ? 'list' : 'card');
+        }
     });
 
     // Category nav

@@ -1,8 +1,10 @@
 """API routes for the cybersecurity news aggregator."""
 
+import base64
 import json
 import os
 import re
+import time
 from urllib.parse import urlparse, urlunparse
 from xml.etree.ElementTree import Element, SubElement, tostring
 
@@ -18,6 +20,16 @@ from backend.enricher import enrich_cve
 
 logger = structlog.get_logger()
 router = APIRouter(prefix="/api")
+
+# --- Favicon proxy/cache ---
+# Avoids leaking every visited article's domain directly from the browser to
+# Google, and caches results server-side to reduce redundant external calls.
+_favicon_cache: dict[str, tuple[bytes, str, float]] = {}
+FAVICON_CACHE_TTL = 7 * 24 * 3600  # 7 days
+FAVICON_CACHE_MAX = 1000
+_TRANSPARENT_PNG = base64.b64decode(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
+)
 
 
 class SourceCreate(BaseModel):
@@ -141,6 +153,60 @@ async def get_cve_poc(cve_id: str):
 @router.get("/stats")
 async def get_stats():
     return await db.get_stats()
+
+
+@router.get("/favicon")
+async def get_favicon(domain: str = Query(..., min_length=1, max_length=255)):
+    """Proxy + cache favicons server-side so the browser never contacts
+    third-party favicon services directly (avoids leaking visited domains)."""
+    domain = domain.strip().lower().removeprefix("www.")
+    if not re.match(r"^[a-z0-9.-]+$", domain):
+        raise HTTPException(400, "Invalid domain")
+
+    now = time.time()
+    cached = _favicon_cache.get(domain)
+    if cached and now - cached[2] < FAVICON_CACHE_TTL:
+        content, content_type, _ = cached
+        return Response(
+            content=content,
+            media_type=content_type,
+            headers={"Cache-Control": "public, max-age=86400"},
+        )
+
+    content, content_type = await _fetch_favicon(domain)
+    _favicon_cache[domain] = (content, content_type, now)
+    if len(_favicon_cache) > FAVICON_CACHE_MAX:
+        oldest = min(_favicon_cache, key=lambda k: _favicon_cache[k][2])
+        del _favicon_cache[oldest]
+
+    return Response(
+        content=content,
+        media_type=content_type,
+        headers={"Cache-Control": "public, max-age=86400"},
+    )
+
+
+async def _fetch_favicon(domain: str) -> tuple[bytes, str]:
+    """Try the domain's own favicon.ico first, then fall back to a
+    favicon aggregator, and finally a 1x1 transparent PNG."""
+    candidates = [
+        f"https://{domain}/favicon.ico",
+        f"https://www.google.com/s2/favicons?domain={domain}&sz=32",
+    ]
+    async with httpx.AsyncClient(
+        timeout=5.0, follow_redirects=True, headers={"User-Agent": USER_AGENT}, verify=False
+    ) as client:
+        for url in candidates:
+            try:
+                resp = await client.get(url)
+                if resp.status_code == 200 and resp.content:
+                    content_type = resp.headers.get("content-type", "image/x-icon")
+                    return resp.content, content_type
+            except Exception as e:
+                logger.debug("favicon_fetch_failed", domain=domain, url=url, error=str(e))
+                continue
+
+    return _TRANSPARENT_PNG, "image/png"
 
 
 @router.get("/opml")

@@ -359,6 +359,11 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    /* Prevents this flex item's content (e.g. long unbreakable list-view rows)
+       from forcing the whole layout wider than the viewport. Without this,
+       the browser's flexbox "automatic minimum size" propagates content width
+       upward instead of letting inner flex children (like .row-title) shrink. */
+    min-width: 0;
 }
 
 /* Header */
@@ -487,6 +492,7 @@ body {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 16px;
     flex: 1;
+    min-width: 0;
 }
 
 /* List view layout */
@@ -572,9 +578,25 @@ body {
 @media (max-width: 768px) {
     .article-row {
         flex-wrap: wrap;
+        row-gap: 6px;
+    }
+    .row-title {
+        /* Force title onto its own full-width line so it can truncate
+           correctly instead of fighting other items for space. */
+        flex: 1 1 100%;
+        order: 1;
+        white-space: normal;
+        overflow-wrap: break-word;
     }
     .row-source {
         max-width: none;
+        order: 2;
+    }
+    .row-meta {
+        order: 3;
+        flex: 1 1 100%;
+        margin-left: 0;
+        flex-wrap: wrap;
     }
 }
 

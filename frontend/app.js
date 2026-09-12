@@ -8,6 +8,7 @@ let pocOnly = false;
 let selectedSources = new Set();
 let lastArticleCount = 0;
 let searchDebounceTimer = null;
+let currentView = localStorage.getItem('cybernews-view') || 'card';
 
 // --- Utility ---
 
@@ -78,6 +79,16 @@ function faviconUrl(articleUrl) {
 function renderSkeletons(count = 12) {
     const grid = document.getElementById('article-grid');
     grid.innerHTML = '';
+    if (currentView === 'list') {
+        for (let i = 0; i < count; i++) {
+            grid.innerHTML += `
+                <div class="skeleton-card">
+                    <div class="skeleton skeleton-line-short"></div>
+                    <div class="skeleton skeleton-line"></div>
+                </div>`;
+        }
+        return;
+    }
     for (let i = 0; i < count; i++) {
         grid.innerHTML += `
             <div class="skeleton-card">
@@ -203,9 +214,44 @@ function renderArticleCard(article) {
         </article>`;
 }
 
+function renderArticleRow(article) {
+    const favicon = faviconUrl(article.url);
+    const time = relativeTime(article.published_at);
+    const sourceName = article.source_name || article.source_id || '';
+    const cveIds = article.cve_ids || [];
+    const severity = article.severity;
+
+    let severityHtml = '';
+    if (severity) {
+        severityHtml = `<span class="severity-badge severity-${severity}">${severity}</span>`;
+    }
+
+    let cveHtml = '';
+    if (cveIds.length > 0) {
+        cveHtml = cveIds.slice(0, 3).map(c => `<span class="row-cve">${escapeHtml(c)}</span>`).join('');
+    }
+
+    return `
+        <div class="article-row">
+            <img class="row-favicon" src="${escapeHtml(favicon)}" alt="" onerror="this.style.display='none'" loading="lazy">
+            <span class="card-category row-category ${categoryClass(article.category)}">${categoryLabel(article.category)}</span>
+            <div class="row-title">
+                <a href="${escapeHtml(article.url)}" target="_blank" rel="noopener">${escapeHtml(article.title)}</a>
+            </div>
+            <span class="row-source">${escapeHtml(sourceName)}</span>
+            <div class="row-meta">
+                ${severityHtml}
+                ${cveHtml}
+                <span class="row-time">${escapeHtml(time)}</span>
+            </div>
+        </div>`;
+}
+
 function renderArticles(articles) {
     const grid = document.getElementById('article-grid');
     const emptyState = document.getElementById('empty-state');
+
+    grid.classList.toggle('list-view', currentView === 'list');
 
     if (articles.length === 0) {
         grid.innerHTML = '';
@@ -222,7 +268,8 @@ function renderArticles(articles) {
     }
 
     emptyState.classList.add('hidden');
-    grid.innerHTML = articles.map(renderArticleCard).join('');
+    const renderFn = currentView === 'list' ? renderArticleRow : renderArticleCard;
+    grid.innerHTML = articles.map(renderFn).join('');
 }
 
 function renderPagination(total, page, limit, pages) {
@@ -522,6 +569,19 @@ async function addDiscoveredSource(url, name) {
 // --- Event Listeners ---
 
 document.addEventListener('DOMContentLoaded', () => {
+    // View toggle (card / list)
+    const viewButtons = document.querySelectorAll('.view-toggle-btn');
+    viewButtons.forEach(btn => {
+        if (btn.dataset.view === currentView) btn.classList.add('active');
+        else btn.classList.remove('active');
+        btn.addEventListener('click', () => {
+            currentView = btn.dataset.view;
+            localStorage.setItem('cybernews-view', currentView);
+            viewButtons.forEach(b => b.classList.toggle('active', b.dataset.view === currentView));
+            fetchArticles();
+        });
+    });
+
     // Category nav
     document.querySelectorAll('.cat-btn').forEach(btn => {
         btn.addEventListener('click', () => {
